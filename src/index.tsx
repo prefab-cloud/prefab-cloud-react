@@ -3,7 +3,6 @@ import React, {
 } from 'react';
 import prefab, { Identity } from '@prefab-cloud/prefab-cloud-js';
 
-// TODO: any?
 const PrefabContext = createContext({} as any);
 
 export const usePrefab = () => useContext(PrefabContext);
@@ -12,12 +11,13 @@ export type Props = {
   apiKey: string,
   lookupKey: string,
   identityAttributes: {[key:string]: any},
+  timeout?: number | undefined,
   onError: Function,
   children: React.ReactNode,
 }
 
 function PrefabProvider({
-  apiKey, lookupKey, identityAttributes = {}, onError = () => {}, children,
+  apiKey, lookupKey, identityAttributes = {}, onError = () => {}, children, timeout,
 }: Props) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -42,7 +42,7 @@ function PrefabProvider({
 
       setLoading(true);
 
-      prefab.init({ apiKey, identity }).then(() => {
+      prefab.init({ apiKey, identity, timeout }).then(() => {
         hasStartedLoading.current = false;
         setLoading(false);
         setLoadedIdentity(identityKey);
@@ -68,6 +68,10 @@ function PrefabProvider({
     </PrefabContext.Provider>
   );
 }
+
+PrefabProvider.defaultProps = {
+  timeout: undefined,
+};
 
 export type TestProps = {
   config: {[key:string]: any},
