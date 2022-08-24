@@ -4,7 +4,9 @@ A React provider and hook for [Prefab]
 
 ## Installation
 
-`npm install @prefab-cloud/prefab-cloud-react` or `yarn install @prefab-cloud/prefab-cloud-react`
+`npm install @prefab-cloud/prefab-cloud-react` or `yarn add @prefab-cloud/prefab-cloud-react`
+
+TypeScript types are included with the package.
 
 ## Usage in your app
 
@@ -70,7 +72,7 @@ Here's an explanation of each property
 
 ## Usage in your test suite
 
-Wrap the component under test in a `PrefabTestProvider` and provide the config object to setup your test state.
+Wrap the component under test in a `PrefabTestProvider` and provide a config object to set up your test state.
 
 e.g. if you wanted to test the following trivial component
 
