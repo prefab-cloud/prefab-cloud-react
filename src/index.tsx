@@ -11,20 +11,21 @@ type Props = {
   apiKey: string,
   lookupKey: string,
   identityAttributes: {[key:string]: any},
+  endpoints?: string[] | undefined;
   timeout?: number | undefined,
   onError: Function,
   children: React.ReactNode,
 }
 
 function PrefabProvider({
-  apiKey, lookupKey, identityAttributes = {}, onError = () => {}, children, timeout,
+  apiKey, lookupKey, identityAttributes = {}, onError = () => {}, children, timeout, endpoints,
 }: Props) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
-  const hasStartedLoading = useRef(false);
+  const hasStartedInit = useRef(false);
   // We use this state to pass the loading state to the Provider (updating
   // hasStartedLoading won't trigger an update)
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   // Here we track the current identity so we can reload our config when it
   // changes
   const [loadedIdentity, setLoadedIdentity] = useState('');
@@ -33,17 +34,17 @@ function PrefabProvider({
     const identity = new Identity(lookupKey, identityAttributes);
     const identityKey = identity.encode();
 
-    if (hasStartedLoading.current) {
+    if (hasStartedInit.current) {
       return;
     }
 
-    if (!loading && loadedIdentity !== identityKey) {
-      hasStartedLoading.current = true;
+    if (!hasStartedInit.current && loadedIdentity !== identityKey) {
+      hasStartedInit.current = true;
 
-      setLoading(true);
-
-      prefab.init({ apiKey, identity, timeout }).then(() => {
-        hasStartedLoading.current = false;
+      prefab.init({
+        apiKey, identity, timeout, endpoints,
+      }).then(() => {
+        hasStartedInit.current = false;
         setLoading(false);
         setLoadedIdentity(identityKey);
       })
@@ -61,6 +62,7 @@ function PrefabProvider({
     get: prefab.get.bind(prefab),
     prefab,
     loading,
+    hasStartedInit,
   }), [lookupKey, identityAttributes, loading, prefab]);
 
   return (
@@ -72,6 +74,7 @@ function PrefabProvider({
 
 PrefabProvider.defaultProps = {
   timeout: undefined,
+  endpoints: undefined,
 };
 
 type TestProps = {
