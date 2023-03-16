@@ -1,13 +1,13 @@
 import React, {
   createContext, useContext, useState, useEffect, useRef, useMemo,
 } from 'react';
-import prefab, { Identity } from '@prefab-cloud/prefab-cloud-js';
+import { prefab, Identity } from '@prefab-cloud/prefab-cloud-js';
 
 const PrefabContext = createContext({} as any);
 
-export const usePrefab = () => useContext(PrefabContext);
+const usePrefab = () => useContext(PrefabContext);
 
-export type Props = {
+type Props = {
   apiKey: string,
   lookupKey: string,
   identityAttributes: {[key:string]: any},
@@ -59,6 +59,7 @@ function PrefabProvider({
     identityAttributes,
     isEnabled: prefab.isEnabled.bind(prefab),
     get: prefab.get.bind(prefab),
+    prefab,
     loading,
   }), [lookupKey, identityAttributes, loading, prefab]);
 
@@ -73,12 +74,12 @@ PrefabProvider.defaultProps = {
   timeout: undefined,
 };
 
-export type TestProps = {
+type TestProps = {
   config: {[key:string]: any},
   children: React.ReactNode,
 }
 
-export function PrefabTestProvider({ config, children }: TestProps) {
+function PrefabTestProvider({ config, children }: TestProps) {
   const get = (key:string) => config[key];
   const isEnabled = (key:string) => !!get(key);
 
@@ -95,4 +96,6 @@ export function PrefabTestProvider({ config, children }: TestProps) {
   );
 }
 
-export default PrefabProvider;
+export {
+  PrefabProvider, PrefabTestProvider, usePrefab, TestProps, Props,
+};

@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { act } from 'react-dom/test-utils';
-import PrefabProvider, { PrefabTestProvider, usePrefab } from './index';
+import { PrefabProvider, PrefabTestProvider, usePrefab } from './index';
 
 function MyComponent() {
   const { get, isEnabled, loading } = usePrefab();
