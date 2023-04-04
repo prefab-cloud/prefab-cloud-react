@@ -97,7 +97,7 @@ function MyComponent() {
 You could do the following in [jest]/[rtl]
 
 ```javascript
-import { PrefabTestProvider } from './index';
+import { PrefabTestProvider } from '@prefab-cloud/prefab-cloud-react';
 
 const renderInTestProvider = (config: {[key: string]: any}) => {
   render(

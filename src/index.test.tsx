@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
@@ -16,7 +15,11 @@ function MyComponent() {
   return (
     <div>
       <h1 role="alert">{greeting}</h1>
-      { isEnabled('secretFeature') && <button type="submit" title="secret-feature">Secret feature</button> }
+      {isEnabled('secretFeature') && (
+        <button type="submit" title="secret-feature">
+          Secret feature
+        </button>
+      )}
     </div>
   );
 }
@@ -35,7 +38,7 @@ describe('Provider', () => {
     );
   };
 
-  const stubConfig = (config: {[key:string]: any}) => new Promise((resolve) => {
+  const stubConfig = (config: { [key: string]: any }) => new Promise((resolve) => {
     global.fetch = jest.fn(() => Promise.resolve({
       ok: true,
       json: () => {
@@ -45,7 +48,7 @@ describe('Provider', () => {
     })) as jest.Mock;
   });
 
-  const renderWithConfig = async (config: {[key:string]: any}) => {
+  const renderWithConfig = async (config: { [key: string]: any }) => {
     const promise = stubConfig(config);
 
     renderInProvider();
@@ -96,7 +99,7 @@ describe('Provider', () => {
 });
 
 describe('TestProvider', () => {
-  const renderInTestProvider = (config: {[key: string]: any}) => {
+  const renderInTestProvider = (config: { [key: string]: any }) => {
     render(
       <PrefabTestProvider config={config}>
         <MyComponent />
