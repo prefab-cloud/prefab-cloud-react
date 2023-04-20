@@ -13,7 +13,7 @@ TypeScript types are included with the package.
 Wrap your component tree in the `PrefabProvider`, e.g.
 
 ```javascript
-import PrefabProvider from '@prefab-cloud/prefab-cloud-react';
+import { PrefabProvider } from '@prefab-cloud/prefab-cloud-react';
 
 const WrappedApp = () => {
   const lookupKey = "user-12345";
