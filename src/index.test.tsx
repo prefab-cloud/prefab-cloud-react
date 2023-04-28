@@ -2,7 +2,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { act } from 'react-dom/test-utils';
+import { ConfigValue } from '@prefab-cloud/prefab-cloud-js';
 import { PrefabProvider, PrefabTestProvider, usePrefab } from './index';
+
+type Config = { [key: string]: any };
 
 function MyComponent() {
   const { get, isEnabled, loading } = usePrefab();
@@ -24,13 +27,34 @@ function MyComponent() {
   );
 }
 
+let warn: ReturnType<typeof jest.spyOn>;
+let error: ReturnType<typeof jest.spyOn>;
+
+beforeEach(() => {
+  error = jest.spyOn(console, 'error').mockImplementation(() => {});
+  warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+});
+
+afterEach(() => {
+  warn.mockReset();
+  error.mockReset();
+});
+
 describe('Provider', () => {
-  const renderInProvider = () => {
+  const defaultContextAttributes = { user: { email: 'test@example.com' } };
+
+  const renderInProvider = ({
+    contextAttributes,
+    identityAttributes,
+  }: {
+    contextAttributes?: { [key: string]: Record<string, ConfigValue> };
+    identityAttributes?: { [key: string]: any };
+  }) => {
     render(
       <PrefabProvider
         apiKey="api-key"
-        lookupKey="user-1234"
-        identityAttributes={{}}
+        contextAttributes={contextAttributes}
+        identityAttributes={identityAttributes}
         onError={() => {}}
       >
         <MyComponent />
@@ -38,7 +62,7 @@ describe('Provider', () => {
     );
   };
 
-  const stubConfig = (config: { [key: string]: any }) => new Promise((resolve) => {
+  const stubConfig = (config: Config) => new Promise((resolve) => {
     global.fetch = jest.fn(() => Promise.resolve({
       ok: true,
       json: () => {
@@ -48,10 +72,15 @@ describe('Provider', () => {
     })) as jest.Mock;
   });
 
-  const renderWithConfig = async (config: { [key: string]: any }) => {
+  const renderWithConfig = async (
+    config: Config,
+    providerConfig: Parameters<typeof renderInProvider>[0] = {
+      contextAttributes: defaultContextAttributes,
+    },
+  ) => {
     const promise = stubConfig(config);
 
-    renderInProvider();
+    renderInProvider(providerConfig);
 
     await act(async () => {
       await promise;
@@ -96,10 +125,26 @@ describe('Provider', () => {
     const secretFeature = screen.queryByTitle('secret-feature');
     expect(secretFeature).not.toBeInTheDocument();
   });
+
+  it('warns when provided identityAttributes', async () => {
+    const identityAttributes = { email: 'test@example.com' };
+
+    await renderWithConfig({}, { identityAttributes });
+
+    expect(warn).toHaveBeenCalledWith(
+      'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead',
+    );
+  });
+
+  it('errors when you provide neither contextAttributes or identityAttributes', async () => {
+    await expect(async () => {
+      await renderWithConfig({}, {});
+    }).rejects.toThrowError('You must provide contextAttributes');
+  });
 });
 
 describe('TestProvider', () => {
-  const renderInTestProvider = (config: { [key: string]: any }) => {
+  const renderInTestProvider = (config: Config) => {
     render(
       <PrefabTestProvider config={config}>
         <MyComponent />

@@ -1,26 +1,29 @@
 import React from 'react';
-import { prefab, Identity } from '@prefab-cloud/prefab-cloud-js';
+import {
+  prefab, ConfigValue, Context, Identity,
+} from '@prefab-cloud/prefab-cloud-js';
 
-type LookupKey = string;
-type IdentityAttributes = { [key: string]: any };
+type IdentityAttributes = undefined | { [key: string]: any };
 
-type Context = {
+type ContextAttributes = { [key: string]: Record<string, ConfigValue> };
+
+type ProvidedContext = {
   get: (key: string) => any;
   hasStartedInit: boolean;
-  identityAttributes: IdentityAttributes;
+  identityAttributes?: IdentityAttributes;
+  contextAttributes?: ContextAttributes;
   isEnabled: (key: string) => boolean;
   loading: boolean;
-  lookupKey: LookupKey;
   prefab: typeof prefab;
 };
 
-const defaultContext: Context = {
+const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
   hasStartedInit: false,
   isEnabled: (_: string) => false,
   loading: true,
   identityAttributes: {},
-  lookupKey: '',
+  contextAttributes: {},
   prefab,
 };
 
@@ -30,8 +33,8 @@ const usePrefab = () => React.useContext(PrefabContext);
 
 type Props = {
   apiKey: string;
-  lookupKey: LookupKey;
-  identityAttributes: IdentityAttributes;
+  identityAttributes?: IdentityAttributes;
+  contextAttributes?: ContextAttributes;
   endpoints?: string[] | undefined;
   timeout?: number | undefined;
   onError: Function;
@@ -40,8 +43,8 @@ type Props = {
 
 function PrefabProvider({
   apiKey,
-  lookupKey,
-  identityAttributes = {},
+  identityAttributes = undefined,
+  contextAttributes = {},
   onError = () => {},
   children,
   timeout,
@@ -55,41 +58,53 @@ function PrefabProvider({
   const [loading, setLoading] = React.useState(true);
   // Here we track the current identity so we can reload our config when it
   // changes
-  const [loadedIdentity, setLoadedIdentity] = React.useState('');
+  const [loadedContextKey, setLoadedContextKey] = React.useState('');
+
+  if (!identityAttributes && Object.keys(contextAttributes).length === 0) {
+    throw new Error('You must provide contextAttributes');
+  }
 
   React.useEffect(() => {
-    const identity = new Identity(lookupKey, identityAttributes);
-    const identityKey = identity.encode();
-
     if (hasStartedInit.current) {
       return;
     }
 
-    if (!hasStartedInit.current && loadedIdentity !== identityKey) {
+    const initOptions: Parameters<typeof prefab.init>[0] = {
+      apiKey,
+      timeout,
+      endpoints,
+    };
+
+    if (identityAttributes) {
+      console.warn(
+        'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead',
+      );
+      initOptions.context = new Identity('', identityAttributes).toContext();
+    } else {
+      initOptions.context = new Context(contextAttributes);
+    }
+
+    const contextKey = initOptions.context.encode();
+
+    if (!hasStartedInit.current && loadedContextKey !== contextKey) {
       hasStartedInit.current = true;
 
       prefab
-        .init({
-          apiKey,
-          identity,
-          timeout,
-          endpoints,
-        })
+        .init(initOptions)
         .then(() => {
           hasStartedInit.current = false;
           setLoading(false);
-          setLoadedIdentity(identityKey);
+          setLoadedContextKey(contextKey);
         })
         .catch((reason) => {
           setLoading(false);
           onError(reason);
         });
     }
-  }, [apiKey, loadedIdentity, lookupKey, identityAttributes, loading, setLoading, onError]);
+  }, [apiKey, loadedContextKey, identityAttributes, loading, setLoading, onError]);
 
-  const value: Context = React.useMemo(
+  const value: ProvidedContext = React.useMemo(
     () => ({
-      lookupKey,
       identityAttributes,
       isEnabled: prefab.isEnabled.bind(prefab),
       get: prefab.get.bind(prefab),
@@ -97,7 +112,7 @@ function PrefabProvider({
       loading,
       hasStartedInit: hasStartedInit.current,
     }),
-    [lookupKey, identityAttributes, loading, prefab],
+    [identityAttributes, loading, prefab],
   );
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
@@ -117,12 +132,11 @@ function PrefabTestProvider({ config, children }: TestProps) {
   const get = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
-  const value: Context = React.useMemo(
+  const value: ProvidedContext = React.useMemo(
     () => ({
       isEnabled,
       get,
       loading: false,
-      lookupKey: 'test',
       identityAttributes: {},
       hasStartedInit: true,
       prefab,

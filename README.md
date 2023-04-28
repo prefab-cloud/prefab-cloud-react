@@ -16,8 +16,7 @@ Wrap your component tree in the `PrefabProvider`, e.g.
 import { PrefabProvider } from '@prefab-cloud/prefab-cloud-react';
 
 const WrappedApp = () => {
-  const lookupKey = "user-12345";
-  const identityAttributes = {email: "jeffrey@example.com", plan: "advanced"};
+  const contextAttributes = {email: "jeffrey@example.com", plan: "advanced"};
 
   const onError = (reason) => {
     console.error(reason);
@@ -26,8 +25,7 @@ const WrappedApp = () => {
   return (
     <PrefabProvider
       apiKey={'YOUR_API_KEY'}
-      lookupKey={lookupKey}
-      identityAttributes={identityAttributes}
+      contextAttributes={contextAttributes}
       onError={onError}>
       <App />
     </PrefabProvider>
@@ -57,18 +55,17 @@ const Logo = () => {
 `usePrefab` exposes the following:
 
 ```javascript
-const { isEnabled, get, loading, lookupKey, identityAttributes } = usePrefab();
+const { isEnabled, get, loading, contextAttributes } = usePrefab();
 ```
 
 Here's an explanation of each property
 
-| property             | example                 | purpose                                                                                            |
-|----------------------|-------------------------|----------------------------------------------------------------------------------------------------|
-| `isEnabled`          | `isEnabled("new-logo")` | returns a boolean (default `false`) if a feature is enabled based on the currently identified user |
-| `get`                | `get('retry-count')`    | returns the value of a flag or config                                                              |
-| `loading`            | `if (loading) { ... }`  | a boolean indicating whether prefab content is being loaded                                        |
-| `lookupKey`          | N/A                     | this is the key you passed when setting up the provider                                            |
-| `identityAttributes` | N/A                     | this is the identity attributes object you passed when setting up the provider                     |
+| property             | example                 | purpose                                                                                  |
+|----------------------|-------------------------|------------------------------------------------------------------------------------------|
+| `isEnabled`          | `isEnabled("new-logo")` | returns a boolean (default `false`) if a feature is enabled based on the current context |
+| `get`                | `get('retry-count')`    | returns the value of a flag or config                                                    |
+| `loading`            | `if (loading) { ... }`  | a boolean indicating whether prefab content is being loaded                              |
+| `contextAttributes`  | N/A                     | this is the context attributes object you passed when setting up the provider            |
 
 ## Usage in your test suite
 
