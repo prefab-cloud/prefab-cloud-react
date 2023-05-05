@@ -16,7 +16,7 @@ Wrap your component tree in the `PrefabProvider`, e.g.
 import { PrefabProvider } from '@prefab-cloud/prefab-cloud-react';
 
 const WrappedApp = () => {
-  const contextAttributes = {email: "jeffrey@example.com", plan: "advanced"};
+  const context = { user: { email: "jeffrey@example.com" }, subscription: { plan: "advanced" } };
 
   const onError = (reason) => {
     console.error(reason);
@@ -25,7 +25,7 @@ const WrappedApp = () => {
   return (
     <PrefabProvider
       apiKey={'YOUR_API_KEY'}
-      contextAttributes={contextAttributes}
+      contextAttributes={context}
       onError={onError}>
       <App />
     </PrefabProvider>
