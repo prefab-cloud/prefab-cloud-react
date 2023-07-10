@@ -7,6 +7,7 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc --build --verbose",
     "test": "npm run build && jest --verbose dist/",
+    "lint": "eslint --ext .ts,.tsx src/",
     "release": "npm run build && rm -rf dist/jest.config.js dist/src/*.test.js",
     "preversion": "npm run test",
     "postversion": "npm run release && git push && git push --tags"
