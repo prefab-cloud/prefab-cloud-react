@@ -3,6 +3,7 @@ Changelog
 ## NEXT
 
 - Update eslint and resolve all existing errors/warnings
+- Add and configure prettier
 
 ## [0.1.11] - 2023-07-06
 
