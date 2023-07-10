@@ -9,6 +9,8 @@ module.exports = {
     'airbnb',
     'plugin:import/typescript',
     'plugin:@typescript-eslint/recommended',
+    // Make sure this is always the last configuration in the extends array.
+    'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
