@@ -13,69 +13,65 @@ TypeScript types are included with the package.
 Wrap your component tree in the `PrefabProvider`, e.g.
 
 ```javascript
-import { PrefabProvider } from '@prefab-cloud/prefab-cloud-react';
+import {PrefabProvider} from '@prefab-cloud/prefab-cloud-react';
 
 const WrappedApp = () => {
-  const context = { user: { email: "jeffrey@example.com" }, subscription: { plan: "advanced" } };
+  const context = {
+    user: {email: 'jeffrey@example.com'},
+    subscription: {plan: 'advanced'},
+  };
 
   const onError = (reason) => {
     console.error(reason);
-  }
+  };
 
   return (
-    <PrefabProvider
-      apiKey={'YOUR_API_KEY'}
-      contextAttributes={context}
-      onError={onError}>
+    <PrefabProvider apiKey={'YOUR_API_KEY'} contextAttributes={context} onError={onError}>
       <App />
     </PrefabProvider>
   );
-}
+};
 ```
 
 Then use the `usePrefab` hook to fetch flags and config values
 
 ```javascript
 const Logo = () => {
-  const { isEnabled } = usePrefab();
+  const {isEnabled} = usePrefab();
 
-  if (isEnabled("new-logo")) {
-    return (
-      <img src={newLogo} className="App-logo" alt="logo" />
-    );
+  if (isEnabled('new-logo')) {
+    return <img src={newLogo} className="App-logo" alt="logo" />;
   }
 
-  return (
-    <img src={logo} className="App-logo" alt="logo" />
-  );
+  return <img src={logo} className="App-logo" alt="logo" />;
 };
-
 ```
 
 `usePrefab` exposes the following:
 
 ```javascript
-const { isEnabled, get, loading, contextAttributes } = usePrefab();
+const {isEnabled, get, loading, contextAttributes} = usePrefab();
 ```
 
 Here's an explanation of each property
 
-| property             | example                 | purpose                                                                                  |
-|----------------------|-------------------------|------------------------------------------------------------------------------------------|
-| `isEnabled`          | `isEnabled("new-logo")` | returns a boolean (default `false`) if a feature is enabled based on the current context |
-| `get`                | `get('retry-count')`    | returns the value of a flag or config                                                    |
-| `loading`            | `if (loading) { ... }`  | a boolean indicating whether prefab content is being loaded                              |
-| `contextAttributes`  | N/A                     | this is the context attributes object you passed when setting up the provider            |
+| property            | example                 | purpose                                                                                  |
+| ------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| `isEnabled`         | `isEnabled("new-logo")` | returns a boolean (default `false`) if a feature is enabled based on the current context |
+| `get`               | `get('retry-count')`    | returns the value of a flag or config                                                    |
+| `loading`           | `if (loading) { ... }`  | a boolean indicating whether prefab content is being loaded                              |
+| `contextAttributes` | N/A                     | this is the context attributes object you passed when setting up the provider            |
 
 ## Usage in your test suite
 
-Wrap the component under test in a `PrefabTestProvider` and provide a config object to set up your test state.
+Wrap the component under test in a `PrefabTestProvider` and provide a config object to set up your
+test state.
 
 e.g. if you wanted to test the following trivial component
 
 ```javascript
 function MyComponent() {
-  const { get, isEnabled, loading } = usePrefab();
+  const {get, isEnabled, loading} = usePrefab();
   const greeting = get('greeting') || 'Greetings';
 
   if (loading) {
@@ -85,7 +81,11 @@ function MyComponent() {
   return (
     <div>
       <h1 role="alert">{greeting}</h1>
-      { isEnabled('secretFeature') && <button type="submit" title="secret-feature">Secret feature</button> }
+      {isEnabled('secretFeature') && (
+        <button type="submit" title="secret-feature">
+          Secret feature
+        </button>
+      )}
     </div>
   );
 }

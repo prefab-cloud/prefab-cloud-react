@@ -1,14 +1,14 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import { act } from 'react-dom/test-utils';
-import { ConfigValue } from '@prefab-cloud/prefab-cloud-js';
-import { PrefabProvider, PrefabTestProvider, usePrefab } from './index';
+import {act} from 'react-dom/test-utils';
+import {ConfigValue} from '@prefab-cloud/prefab-cloud-js';
+import {PrefabProvider, PrefabTestProvider, usePrefab} from './index';
 
-type Config = { [key: string]: any };
+type Config = {[key: string]: any};
 
 function MyComponent() {
-  const { get, isEnabled, loading } = usePrefab();
+  const {get, isEnabled, loading} = usePrefab();
   const greeting = get('greeting') || 'Default';
 
   if (loading) {
@@ -41,14 +41,14 @@ afterEach(() => {
 });
 
 describe('Provider', () => {
-  const defaultContextAttributes = { user: { email: 'test@example.com' } };
+  const defaultContextAttributes = {user: {email: 'test@example.com'}};
 
   const renderInProvider = ({
     contextAttributes,
     identityAttributes,
   }: {
-    contextAttributes?: { [key: string]: Record<string, ConfigValue> };
-    identityAttributes?: { [key: string]: any };
+    contextAttributes?: {[key: string]: Record<string, ConfigValue>};
+    identityAttributes?: {[key: string]: any};
   }) => {
     render(
       <PrefabProvider
@@ -58,25 +58,28 @@ describe('Provider', () => {
         onError={() => {}}
       >
         <MyComponent />
-      </PrefabProvider>,
+      </PrefabProvider>
     );
   };
 
-  const stubConfig = (config: Config) => new Promise((resolve) => {
-    global.fetch = jest.fn(() => Promise.resolve({
-      ok: true,
-      json: () => {
-        setTimeout(resolve);
-        return { values: config };
-      },
-    })) as jest.Mock;
-  });
+  const stubConfig = (config: Config) =>
+    new Promise((resolve) => {
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          ok: true,
+          json: () => {
+            setTimeout(resolve);
+            return {values: config};
+          },
+        })
+      ) as jest.Mock;
+    });
 
   const renderWithConfig = async (
     config: Config,
     providerConfig: Parameters<typeof renderInProvider>[0] = {
       contextAttributes: defaultContextAttributes,
-    },
+    }
   ) => {
     const promise = stubConfig(config);
 
@@ -100,7 +103,7 @@ describe('Provider', () => {
   });
 
   it('allows providing flag values', async () => {
-    await renderWithConfig({ greeting: { string: 'CUSTOM' } });
+    await renderWithConfig({greeting: {string: 'CUSTOM'}});
 
     const alert = screen.queryByRole('alert');
     expect(alert).toHaveTextContent('CUSTOM');
@@ -109,7 +112,10 @@ describe('Provider', () => {
   });
 
   it('allows providing true flag booleans', async () => {
-    await renderWithConfig({ greeting: { string: 'CUSTOM' }, secretFeature: { boolean: true } });
+    await renderWithConfig({
+      greeting: {string: 'CUSTOM'},
+      secretFeature: {boolean: true},
+    });
 
     const alert = screen.queryByRole('alert');
     expect(alert).toHaveTextContent('CUSTOM');
@@ -118,7 +124,10 @@ describe('Provider', () => {
   });
 
   it('allows providing false flag booleans', async () => {
-    await renderWithConfig({ greeting: { string: 'CUSTOM' }, secretFeature: { boolean: false } });
+    await renderWithConfig({
+      greeting: {string: 'CUSTOM'},
+      secretFeature: {boolean: false},
+    });
 
     const alert = screen.queryByRole('alert');
     expect(alert).toHaveTextContent('CUSTOM');
@@ -127,12 +136,12 @@ describe('Provider', () => {
   });
 
   it('warns when provided identityAttributes', async () => {
-    const identityAttributes = { email: 'test@example.com' };
+    const identityAttributes = {email: 'test@example.com'};
 
-    await renderWithConfig({}, { identityAttributes });
+    await renderWithConfig({}, {identityAttributes});
 
     expect(warn).toHaveBeenCalledWith(
-      'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead',
+      'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead'
     );
   });
 
@@ -148,7 +157,7 @@ describe('TestProvider', () => {
     render(
       <PrefabTestProvider config={config}>
         <MyComponent />
-      </PrefabTestProvider>,
+      </PrefabTestProvider>
     );
   };
 
@@ -162,7 +171,7 @@ describe('TestProvider', () => {
   });
 
   it('allows providing flag values', async () => {
-    renderInTestProvider({ greeting: 'CUSTOM' });
+    renderInTestProvider({greeting: 'CUSTOM'});
 
     const alert = screen.queryByRole('alert');
     expect(alert).toHaveTextContent('CUSTOM');
@@ -171,7 +180,7 @@ describe('TestProvider', () => {
   });
 
   it('allows providing true flag booleans', async () => {
-    renderInTestProvider({ greeting: 'CUSTOM', secretFeature: true });
+    renderInTestProvider({greeting: 'CUSTOM', secretFeature: true});
 
     const alert = screen.queryByRole('alert');
     expect(alert).toHaveTextContent('CUSTOM');
@@ -180,7 +189,7 @@ describe('TestProvider', () => {
   });
 
   it('allows providing false flag booleans', async () => {
-    renderInTestProvider({ greeting: 'CUSTOM', secretFeature: false });
+    renderInTestProvider({greeting: 'CUSTOM', secretFeature: false});
 
     const alert = screen.queryByRole('alert');
     expect(alert).toHaveTextContent('CUSTOM');
