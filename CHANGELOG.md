@@ -1,5 +1,9 @@
 Changelog
 
+## NEXT
+
+- Update eslint and resolve all existing errors/warnings
+
 ## [0.1.11] - 2023-07-06
 
 - Update `prefab-cloud-js` to v0.1.11
