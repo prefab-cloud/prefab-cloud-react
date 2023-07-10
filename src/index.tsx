@@ -33,9 +33,10 @@ type Props = {
   apiKey: string;
   identityAttributes?: IdentityAttributes;
   contextAttributes?: ContextAttributes;
-  endpoints?: string[] | undefined;
-  timeout?: number | undefined;
-  onError: (error: Error) => void;
+  endpoints?: string[];
+  timeout?: number;
+  pollInterval?: number;
+  onError?: (error: Error) => void;
 };
 
 function PrefabProvider({
@@ -46,6 +47,7 @@ function PrefabProvider({
   children,
   timeout,
   endpoints,
+  pollInterval,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -93,6 +95,10 @@ function PrefabProvider({
           hasStartedInit.current = false;
           setLoading(false);
           setLoadedContextKey(contextKey);
+
+          if (pollInterval) {
+            prefab.poll({frequencyInMs: pollInterval});
+          }
         })
         .catch((reason) => {
           setLoading(false);

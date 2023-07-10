@@ -10,6 +10,8 @@ TypeScript types are included with the package.
 
 ## Usage in your app
 
+### Configure the Provider
+
 Wrap your component tree in the `PrefabProvider`, e.g.
 
 ```javascript
@@ -21,8 +23,8 @@ const WrappedApp = () => {
     subscription: {plan: 'advanced'},
   };
 
-  const onError = (reason) => {
-    console.error(reason);
+  const onError = (error) => {
+    console.error(error);
   };
 
   return (
@@ -33,7 +35,20 @@ const WrappedApp = () => {
 };
 ```
 
-Then use the `usePrefab` hook to fetch flags and config values
+Here's an explanation of each provider prop:
+
+| property            | required | type                | purpose                                                                       |
+| ------------------- | -------- | ------------------- | ----------------------------------------------------------------------------- |
+| `apiKey`            | yes      | `string`            | your Prefab API key                                                           |
+| `onError`           | no       | `(error) => void`   | callback invoked if prefab fails to initialize                                |
+| `contextAttributes` | no       | `ContextAttributes` | this is the context attributes object you passed when setting up the provider |
+| `endpoints`         | no       | `string[]`          | CDN endpoints to load configuration from (defaults to 2 prefab-based CDNs)    |
+| `timeout`           | no       | `number`            | initialization timeout (defaults to 10 seconds)                               |
+| `pollInterval`      | no       | `number`            | configures prefab to poll for updates every `pollInterval` ms.                |
+
+### Usage in Your Components
+
+Use the `usePrefab` hook to fetch flags and config values:
 
 ```javascript
 const Logo = () => {
@@ -53,7 +68,7 @@ const Logo = () => {
 const {isEnabled, get, loading, contextAttributes} = usePrefab();
 ```
 
-Here's an explanation of each property
+Here's an explanation of each property:
 
 | property            | example                 | purpose                                                                                  |
 | ------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
