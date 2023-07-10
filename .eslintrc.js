@@ -10,7 +10,7 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:@typescript-eslint/recommended',
     // Make sure this is always the last configuration in the extends array.
-    'plugin:prettier/recommended',
+    'prettier',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -20,13 +20,14 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
+  plugins: ['react', '@typescript-eslint'],
   rules: {
     'react/require-default-props': 'off', // default props are deprecated and shouldn't be used: https://sophiabits.com/blog/stop-using-defaultprops
     'no-unused-vars': 'off', // this rule is incompatible with typescript-eslint's 'no-unused-vars
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: '^_'}],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    'react/jsx-filename-extension': [2, { extensions: ['.js', '.jsx', '.ts', '.tsx'] }],
+    'react/jsx-filename-extension': [2, {extensions: ['.js', '.jsx', '.ts', '.tsx']}],
     'import/extensions': [
       'error',
       'ignorePackages',

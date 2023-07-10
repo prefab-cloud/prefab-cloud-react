@@ -1,7 +1,5 @@
 import React from 'react';
-import {
-  prefab, ConfigValue, Context, Identity,
-} from '@prefab-cloud/prefab-cloud-js';
+import {prefab, ConfigValue, Context, Identity} from '@prefab-cloud/prefab-cloud-js';
 
 type IdentityAttributes = undefined | {[key: string]: any};
 
@@ -78,7 +76,7 @@ function PrefabProvider({
     if (identityAttributes) {
       // eslint-disable-next-line no-console
       console.warn(
-        'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead',
+        'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead'
       );
       initOptions.context = new Identity('', identityAttributes).toContext();
     } else {
@@ -113,7 +111,7 @@ function PrefabProvider({
       loading,
       hasStartedInit: hasStartedInit.current,
     }),
-    [identityAttributes, loading, prefab],
+    [identityAttributes, loading, prefab]
   );
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
@@ -124,7 +122,7 @@ type TestProps = {
   children: React.ReactNode;
 };
 
-function PrefabTestProvider({ config, children }: TestProps) {
+function PrefabTestProvider({config, children}: TestProps) {
   const get = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
@@ -137,12 +135,10 @@ function PrefabTestProvider({ config, children }: TestProps) {
       hasStartedInit: true,
       prefab,
     }),
-    [config],
+    [config]
   );
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
 }
 
-export {
-  PrefabProvider, PrefabTestProvider, usePrefab, TestProps, Props, prefab,
-};
+export {PrefabProvider, PrefabTestProvider, usePrefab, TestProps, Props, prefab};
