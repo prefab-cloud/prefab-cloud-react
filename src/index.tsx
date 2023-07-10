@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {PropsWithChildren} from 'react';
 import {prefab, ConfigValue, Context, Identity} from '@prefab-cloud/prefab-cloud-js';
 
 type IdentityAttributes = undefined | {[key: string]: any};
@@ -36,7 +36,6 @@ type Props = {
   endpoints?: string[] | undefined;
   timeout?: number | undefined;
   onError: (error: Error) => void;
-  children: React.ReactNode;
 };
 
 function PrefabProvider({
@@ -47,7 +46,7 @@ function PrefabProvider({
   children,
   timeout,
   endpoints,
-}: Props) {
+}: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
   const hasStartedInit = React.useRef(false);
@@ -119,10 +118,9 @@ function PrefabProvider({
 
 type TestProps = {
   config: Record<string, any>;
-  children: React.ReactNode;
 };
 
-function PrefabTestProvider({config, children}: TestProps) {
+function PrefabTestProvider({config, children}: PropsWithChildren<TestProps>) {
   const get = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
