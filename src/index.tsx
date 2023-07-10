@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {PropsWithChildren} from 'react';
 import {prefab, ConfigValue, Context, Identity} from '@prefab-cloud/prefab-cloud-js';
 
 type IdentityAttributes = undefined | {[key: string]: any};
@@ -33,10 +33,10 @@ type Props = {
   apiKey: string;
   identityAttributes?: IdentityAttributes;
   contextAttributes?: ContextAttributes;
-  endpoints?: string[] | undefined;
-  timeout?: number | undefined;
-  onError: (error: Error) => void;
-  children: React.ReactNode;
+  endpoints?: string[];
+  timeout?: number;
+  pollInterval?: number;
+  onError?: (error: Error) => void;
 };
 
 function PrefabProvider({
@@ -47,7 +47,8 @@ function PrefabProvider({
   children,
   timeout,
   endpoints,
-}: Props) {
+  pollInterval,
+}: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
   const hasStartedInit = React.useRef(false);
@@ -94,6 +95,10 @@ function PrefabProvider({
           hasStartedInit.current = false;
           setLoading(false);
           setLoadedContextKey(contextKey);
+
+          if (pollInterval) {
+            prefab.poll({frequencyInMs: pollInterval});
+          }
         })
         .catch((reason) => {
           setLoading(false);
@@ -119,10 +124,9 @@ function PrefabProvider({
 
 type TestProps = {
   config: Record<string, any>;
-  children: React.ReactNode;
 };
 
-function PrefabTestProvider({config, children}: TestProps) {
+function PrefabTestProvider({config, children}: PropsWithChildren<TestProps>) {
   const get = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 

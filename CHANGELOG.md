@@ -4,6 +4,7 @@ Changelog
 
 - Update eslint and resolve all existing errors/warnings
 - Add and configure prettier
+- Add support for passing a pollInterval to the `PrefabProvider`
 
 ## [0.1.11] - 2023-07-06
 
