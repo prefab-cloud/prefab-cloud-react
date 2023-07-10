@@ -1,4 +1,21 @@
-# [Changelog
+Changelog
+
+## [0.1.11] - 2023-07-06
+
+- Update `prefab-cloud-js` to v0.1.11
+
+## [0.1.10] - 2023-06-27
+
+- Update `prefab-cloud-js` to v0.1.10
+
+## [0.1.9] - 2023-06-27
+
+- Update `prefab-cloud-js` to v0.1.9
+
+## [0.1.8] - 2023-06-27
+
+- Initial CHANGELOG (with backdated content)
+- Formatting cleanup
 
 ## [0.1.7] - 2023-05-01
 
