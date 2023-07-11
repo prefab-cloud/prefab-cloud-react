@@ -1,5 +1,9 @@
 Changelog
 
+## 0.1.15 - 2023-07-11
+
+- Update `prefab-cloud-js` to v0.1.14
+
 ## 0.1.14 - 2023-07-11
 
 - Update `prefab-cloud-js` to v0.1.13
