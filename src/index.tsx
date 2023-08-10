@@ -53,7 +53,7 @@ function PrefabProvider({
   // StrictMode
   const hasStartedInit = React.useRef(false);
   // We use this state to pass the loading state to the Provider (updating
-  // hasStartedLoading won't trigger an update)
+  // hasStartedInit won't trigger an update)
   const [loading, setLoading] = React.useState(true);
   // Here we track the current identity so we can reload our config when it
   // changes
@@ -93,8 +93,8 @@ function PrefabProvider({
         .init(initOptions)
         .then(() => {
           hasStartedInit.current = false;
-          setLoading(false);
           setLoadedContextKey(contextKey);
+          setLoading(false);
 
           if (pollInterval) {
             prefab.poll({frequencyInMs: pollInterval});
