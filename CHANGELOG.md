@@ -1,5 +1,10 @@
 Changelog
 
+## 0.1.17 - 2023-09-19
+
+- Add support for a `trackEvaluation` callback for forwarding evaluation events to analytics tools,
+  etc.
+
 ## 0.1.16 - 2023-08-10
 
 - Fix race condition (#21)
