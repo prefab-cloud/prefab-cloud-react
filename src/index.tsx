@@ -29,6 +29,8 @@ const PrefabContext = React.createContext(defaultContext);
 
 const usePrefab = () => React.useContext(PrefabContext);
 
+type EvaluationCallback = (key: string, value: ConfigValue, context: Context | undefined) => void;
+
 type Props = {
   apiKey: string;
   identityAttributes?: IdentityAttributes;
@@ -37,6 +39,7 @@ type Props = {
   timeout?: number;
   pollInterval?: number;
   onError?: (error: Error) => void;
+  trackEvaluation?: EvaluationCallback;
 };
 
 function PrefabProvider({
@@ -48,6 +51,7 @@ function PrefabProvider({
   timeout,
   endpoints,
   pollInterval,
+  trackEvaluation = undefined,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -72,6 +76,7 @@ function PrefabProvider({
       apiKey,
       timeout,
       endpoints,
+      trackEvaluation,
     };
 
     if (identityAttributes) {
