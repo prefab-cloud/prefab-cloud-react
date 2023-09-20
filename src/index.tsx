@@ -39,7 +39,7 @@ type Props = {
   timeout?: number;
   pollInterval?: number;
   onError?: (error: Error) => void;
-  trackEvaluation?: EvaluationCallback;
+  afterEvaluationCallback?: EvaluationCallback;
 };
 
 function PrefabProvider({
@@ -51,7 +51,7 @@ function PrefabProvider({
   timeout,
   endpoints,
   pollInterval,
-  trackEvaluation = undefined,
+  afterEvaluationCallback = undefined,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -76,7 +76,7 @@ function PrefabProvider({
       apiKey,
       timeout,
       endpoints,
-      trackEvaluation,
+      afterEvaluationCallback,
     };
 
     if (identityAttributes) {
