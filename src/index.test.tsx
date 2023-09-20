@@ -150,6 +150,36 @@ describe('Provider', () => {
       await renderWithConfig({}, {});
     }).rejects.toThrowError('You must provide contextAttributes');
   });
+
+  it('allows providing an afterEvaluationCallback', async () => {
+    const context = {user: {email: 'test@example.com'}};
+
+    const callback = jest.fn();
+
+    const promise = stubConfig({greeting: {string: 'afterEvaluationCallback'}});
+
+    render(
+      <PrefabProvider
+        apiKey="api-key"
+        contextAttributes={context}
+        afterEvaluationCallback={callback}
+        onError={() => {}}
+      >
+        <MyComponent />
+      </PrefabProvider>
+    );
+
+    await act(async () => {
+      await promise;
+    });
+
+    // wait for async callback to be called
+    await new Promise((r) => setTimeout(r, 1));
+
+    expect(callback).toHaveBeenCalledWith('greeting', 'afterEvaluationCallback', {
+      contexts: context,
+    });
+  });
 });
 
 describe('TestProvider', () => {
