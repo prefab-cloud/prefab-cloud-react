@@ -174,6 +174,7 @@ describe('Provider', () => {
     });
 
     // wait for async callback to be called
+    // eslint-disable-next-line no-promise-executor-return
     await new Promise((r) => setTimeout(r, 1));
 
     expect(callback).toHaveBeenCalledWith('greeting', 'afterEvaluationCallback', {
