@@ -1,6 +1,6 @@
 Changelog
 
-## 0.1.17 - 2023-09-19
+## 0.1.17 - 2023-09-20
 
 - Add support for a `afterEvaluationCallback` callback for forwarding evaluation events to analytics
   tools, etc.
