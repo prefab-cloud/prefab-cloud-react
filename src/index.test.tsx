@@ -145,10 +145,12 @@ describe('Provider', () => {
     );
   });
 
-  it('errors when you provide neither contextAttributes or identityAttributes', async () => {
-    await expect(async () => {
-      await renderWithConfig({}, {});
-    }).rejects.toThrowError('You must provide contextAttributes');
+  it('warns when you provide neither contextAttributes or identityAttributes', async () => {
+    await renderWithConfig({}, {});
+
+    expect(warn).toHaveBeenCalledWith(
+      "PrefabProvider: You haven't passed any contextAttributes. See https://docs.prefab.cloud/docs/sdks/react#using-context"
+    );
   });
 
   it('allows providing an afterEvaluationCallback', async () => {
