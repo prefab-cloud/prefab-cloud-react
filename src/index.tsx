@@ -64,7 +64,10 @@ function PrefabProvider({
   const [loadedContextKey, setLoadedContextKey] = React.useState('');
 
   if (!identityAttributes && Object.keys(contextAttributes).length === 0) {
-    throw new Error('You must provide contextAttributes');
+    // eslint-disable-next-line no-console
+    console.warn(
+      "PrefabProvider: You haven't passed any contextAttributes. See https://docs.prefab.cloud/docs/sdks/react#using-context"
+    );
   }
 
   React.useEffect(() => {
