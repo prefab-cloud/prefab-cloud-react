@@ -36,6 +36,7 @@ type Props = {
   identityAttributes?: IdentityAttributes;
   contextAttributes?: ContextAttributes;
   endpoints?: string[];
+  apiEndpoint?: string;
   timeout?: number;
   pollInterval?: number;
   onError?: (error: Error) => void;
@@ -50,6 +51,7 @@ function PrefabProvider({
   children,
   timeout,
   endpoints,
+  apiEndpoint,
   pollInterval,
   afterEvaluationCallback = undefined,
 }: PropsWithChildren<Props>) {
@@ -79,6 +81,7 @@ function PrefabProvider({
       apiKey,
       timeout,
       endpoints,
+      apiEndpoint,
       afterEvaluationCallback,
     };
 
@@ -108,7 +111,7 @@ function PrefabProvider({
             prefab.poll({frequencyInMs: pollInterval});
           }
         })
-        .catch((reason) => {
+        .catch((reason: any) => {
           setLoading(false);
           onError(reason);
         });
