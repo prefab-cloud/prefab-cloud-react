@@ -1,9 +1,9 @@
-import React, {PropsWithChildren} from 'react';
-import {prefab, ConfigValue, Context, Identity} from '@prefab-cloud/prefab-cloud-js';
+import React, { PropsWithChildren } from "react";
+import { prefab, ConfigValue, Context, Identity } from "@prefab-cloud/prefab-cloud-js";
 
-type IdentityAttributes = undefined | {[key: string]: any};
+type IdentityAttributes = undefined | { [key: string]: any };
 
-type ContextAttributes = {[key: string]: Record<string, ConfigValue>};
+type ContextAttributes = { [key: string]: Record<string, ConfigValue> };
 
 type ProvidedContext = {
   get: (key: string) => any;
@@ -41,6 +41,7 @@ type Props = {
   pollInterval?: number;
   onError?: (error: Error) => void;
   afterEvaluationCallback?: EvaluationCallback;
+  collectEvaluationSummaries?: boolean;
 };
 
 function PrefabProvider({
@@ -54,6 +55,7 @@ function PrefabProvider({
   apiEndpoint,
   pollInterval,
   afterEvaluationCallback = undefined,
+  collectEvaluationSummaries = false,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -63,7 +65,7 @@ function PrefabProvider({
   const [loading, setLoading] = React.useState(true);
   // Here we track the current identity so we can reload our config when it
   // changes
-  const [loadedContextKey, setLoadedContextKey] = React.useState('');
+  const [loadedContextKey, setLoadedContextKey] = React.useState("");
 
   if (!identityAttributes && Object.keys(contextAttributes).length === 0) {
     // eslint-disable-next-line no-console
@@ -83,14 +85,15 @@ function PrefabProvider({
       endpoints,
       apiEndpoint,
       afterEvaluationCallback,
+      collectEvaluationSummaries,
     };
 
     if (identityAttributes) {
       // eslint-disable-next-line no-console
       console.warn(
-        'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead'
+        "identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead"
       );
-      initOptions.context = new Identity('', identityAttributes).toContext();
+      initOptions.context = new Identity("", identityAttributes).toContext();
     } else {
       initOptions.context = new Context(contextAttributes);
     }
@@ -108,7 +111,7 @@ function PrefabProvider({
           setLoading(false);
 
           if (pollInterval) {
-            prefab.poll({frequencyInMs: pollInterval});
+            prefab.poll({ frequencyInMs: pollInterval });
           }
         })
         .catch((reason: any) => {
@@ -137,7 +140,7 @@ type TestProps = {
   config: Record<string, any>;
 };
 
-function PrefabTestProvider({config, children}: PropsWithChildren<TestProps>) {
+function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) {
   const get = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
@@ -156,4 +159,4 @@ function PrefabTestProvider({config, children}: PropsWithChildren<TestProps>) {
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
 }
 
-export {PrefabProvider, PrefabTestProvider, usePrefab, TestProps, Props, prefab};
+export { PrefabProvider, PrefabTestProvider, usePrefab, TestProps, Props, prefab };
