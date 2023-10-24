@@ -2,3 +2,4 @@ coverage
 build.sh
 dist/src/*.test.js
 .github/
+*.tgz
