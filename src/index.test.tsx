@@ -1,15 +1,15 @@
-import React from 'react';
-import {render, screen} from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
-import {act} from 'react-dom/test-utils';
-import {ConfigValue} from '@prefab-cloud/prefab-cloud-js';
-import {PrefabProvider, PrefabTestProvider, usePrefab} from './index';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom/extend-expect";
+import { act } from "react-dom/test-utils";
+import { ConfigValue } from "@prefab-cloud/prefab-cloud-js";
+import { PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
 
-type Config = {[key: string]: any};
+type Config = { [key: string]: any };
 
 function MyComponent() {
-  const {get, isEnabled, loading} = usePrefab();
-  const greeting = get('greeting') || 'Default';
+  const { get, isEnabled, loading } = usePrefab();
+  const greeting = get("greeting") || "Default";
 
   if (loading) {
     return <div>Loading...</div>;
@@ -18,7 +18,7 @@ function MyComponent() {
   return (
     <div>
       <h1 role="alert">{greeting}</h1>
-      {isEnabled('secretFeature') && (
+      {isEnabled("secretFeature") && (
         <button type="submit" title="secret-feature">
           Secret feature
         </button>
@@ -31,8 +31,8 @@ let warn: ReturnType<typeof jest.spyOn>;
 let error: ReturnType<typeof jest.spyOn>;
 
 beforeEach(() => {
-  error = jest.spyOn(console, 'error').mockImplementation(() => {});
-  warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  error = jest.spyOn(console, "error").mockImplementation(() => {});
+  warn = jest.spyOn(console, "warn").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -40,15 +40,15 @@ afterEach(() => {
   error.mockReset();
 });
 
-describe('Provider', () => {
-  const defaultContextAttributes = {user: {email: 'test@example.com'}};
+describe("Provider", () => {
+  const defaultContextAttributes = { user: { email: "test@example.com" } };
 
   const renderInProvider = ({
     contextAttributes,
     identityAttributes,
   }: {
-    contextAttributes?: {[key: string]: Record<string, ConfigValue>};
-    identityAttributes?: {[key: string]: any};
+    contextAttributes?: { [key: string]: Record<string, ConfigValue> };
+    identityAttributes?: { [key: string]: any };
   }) => {
     render(
       <PrefabProvider
@@ -69,7 +69,7 @@ describe('Provider', () => {
           ok: true,
           json: () => {
             setTimeout(resolve);
-            return {values: config};
+            return { values: config };
           },
         })
       ) as jest.Mock;
@@ -90,62 +90,62 @@ describe('Provider', () => {
     });
 
     // wait for the loading content to go away
-    screen.findByRole('alert');
+    screen.findByRole("alert");
   };
 
-  it('renders without config', async () => {
+  it("renders without config", async () => {
     await renderWithConfig({});
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('Default');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("Default");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
   });
 
-  it('allows providing flag values', async () => {
-    await renderWithConfig({greeting: {string: 'CUSTOM'}});
+  it("allows providing flag values", async () => {
+    await renderWithConfig({ greeting: { string: "CUSTOM" } });
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('CUSTOM');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
   });
 
-  it('allows providing true flag booleans', async () => {
+  it("allows providing true flag booleans", async () => {
     await renderWithConfig({
-      greeting: {string: 'CUSTOM'},
-      secretFeature: {boolean: true},
+      greeting: { string: "CUSTOM" },
+      secretFeature: { boolean: true },
     });
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('CUSTOM');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).toBeInTheDocument();
   });
 
-  it('allows providing false flag booleans', async () => {
+  it("allows providing false flag booleans", async () => {
     await renderWithConfig({
-      greeting: {string: 'CUSTOM'},
-      secretFeature: {boolean: false},
+      greeting: { string: "CUSTOM" },
+      secretFeature: { boolean: false },
     });
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('CUSTOM');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
   });
 
-  it('warns when provided identityAttributes', async () => {
-    const identityAttributes = {email: 'test@example.com'};
+  it("warns when provided identityAttributes", async () => {
+    const identityAttributes = { email: "test@example.com" };
 
-    await renderWithConfig({}, {identityAttributes});
+    await renderWithConfig({}, { identityAttributes });
 
     expect(warn).toHaveBeenCalledWith(
-      'identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead'
+      "identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead"
     );
   });
 
-  it('warns when you provide neither contextAttributes or identityAttributes', async () => {
+  it("warns when you provide neither contextAttributes or identityAttributes", async () => {
     await renderWithConfig({}, {});
 
     expect(warn).toHaveBeenCalledWith(
@@ -153,12 +153,12 @@ describe('Provider', () => {
     );
   });
 
-  it('allows providing an afterEvaluationCallback', async () => {
-    const context = {user: {email: 'test@example.com'}};
+  it("allows providing an afterEvaluationCallback", async () => {
+    const context = { user: { email: "test@example.com" } };
 
     const callback = jest.fn();
 
-    const promise = stubConfig({greeting: {string: 'afterEvaluationCallback'}});
+    const promise = stubConfig({ greeting: { string: "afterEvaluationCallback" } });
 
     render(
       <PrefabProvider
@@ -179,13 +179,13 @@ describe('Provider', () => {
     // eslint-disable-next-line no-promise-executor-return
     await new Promise((r) => setTimeout(r, 1));
 
-    expect(callback).toHaveBeenCalledWith('greeting', 'afterEvaluationCallback', {
+    expect(callback).toHaveBeenCalledWith("greeting", "afterEvaluationCallback", {
       contexts: context,
     });
   });
 });
 
-describe('TestProvider', () => {
+describe("TestProvider", () => {
   const renderInTestProvider = (config: Config) => {
     render(
       <PrefabTestProvider config={config}>
@@ -194,39 +194,39 @@ describe('TestProvider', () => {
     );
   };
 
-  it('renders without config', () => {
+  it("renders without config", () => {
     renderInTestProvider({});
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('Default');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("Default");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
   });
 
-  it('allows providing flag values', async () => {
-    renderInTestProvider({greeting: 'CUSTOM'});
+  it("allows providing flag values", async () => {
+    renderInTestProvider({ greeting: "CUSTOM" });
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('CUSTOM');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
   });
 
-  it('allows providing true flag booleans', async () => {
-    renderInTestProvider({greeting: 'CUSTOM', secretFeature: true});
+  it("allows providing true flag booleans", async () => {
+    renderInTestProvider({ greeting: "CUSTOM", secretFeature: true });
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('CUSTOM');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).toBeInTheDocument();
   });
 
-  it('allows providing false flag booleans', async () => {
-    renderInTestProvider({greeting: 'CUSTOM', secretFeature: false});
+  it("allows providing false flag booleans", async () => {
+    renderInTestProvider({ greeting: "CUSTOM", secretFeature: false });
 
-    const alert = screen.queryByRole('alert');
-    expect(alert).toHaveTextContent('CUSTOM');
-    const secretFeature = screen.queryByTitle('secret-feature');
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+    const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
   });
 });

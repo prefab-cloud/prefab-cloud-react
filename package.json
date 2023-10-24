@@ -9,7 +9,7 @@
     "test": "npm run build && jest --verbose dist/",
     "lint": "eslint --ext .ts,.tsx src/",
     "prettier": "prettier . -l",
-    "prettier:fix": "npm run prettier --write",
+    "prettier:fix": "npm run prettier --write .",
     "release": "npm run build && rm -rf dist/jest.config.js dist/src/*.test.js",
     "preversion": "npm run test",
     "postversion": "npm run release && git push && git push --tags"
@@ -17,7 +17,7 @@
   "author": "Jeffrey Chupp",
   "license": "ISC",
   "dependencies": {
-    "@prefab-cloud/prefab-cloud-js": "0.1.16"
+    "@prefab-cloud/prefab-cloud-js": "0.1.17"
   },
   "keywords": [
     "feature-flags",

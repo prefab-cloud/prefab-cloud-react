@@ -1,5 +1,9 @@
 Changelog
 
+## 0.1.19 - 2023-10-24
+
+- Start reporting evaluation telemetry when keys are actually used
+
 ## 0.1.18 - 2023-10-13
 
 - Warn instead of erroring when no context is provided

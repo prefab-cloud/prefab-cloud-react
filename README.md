@@ -15,12 +15,12 @@ TypeScript types are included with the package.
 Wrap your component tree in the `PrefabProvider`, e.g.
 
 ```javascript
-import {PrefabProvider} from '@prefab-cloud/prefab-cloud-react';
+import { PrefabProvider } from "@prefab-cloud/prefab-cloud-react";
 
 const WrappedApp = () => {
   const context = {
-    user: {email: 'jeffrey@example.com'},
-    subscription: {plan: 'advanced'},
+    user: { email: "jeffrey@example.com" },
+    subscription: { plan: "advanced" },
   };
 
   const onError = (error) => {
@@ -28,7 +28,7 @@ const WrappedApp = () => {
   };
 
   return (
-    <PrefabProvider apiKey={'YOUR_API_KEY'} contextAttributes={context} onError={onError}>
+    <PrefabProvider apiKey={"YOUR_API_KEY"} contextAttributes={context} onError={onError}>
       <App />
     </PrefabProvider>
   );
@@ -52,9 +52,9 @@ Use the `usePrefab` hook to fetch flags and config values:
 
 ```javascript
 const Logo = () => {
-  const {isEnabled} = usePrefab();
+  const { isEnabled } = usePrefab();
 
-  if (isEnabled('new-logo')) {
+  if (isEnabled("new-logo")) {
     return <img src={newLogo} className="App-logo" alt="logo" />;
   }
 
@@ -65,7 +65,7 @@ const Logo = () => {
 `usePrefab` exposes the following:
 
 ```javascript
-const {isEnabled, get, loading, contextAttributes} = usePrefab();
+const { isEnabled, get, loading, contextAttributes } = usePrefab();
 ```
 
 Here's an explanation of each property:
@@ -86,8 +86,8 @@ e.g. if you wanted to test the following trivial component
 
 ```javascript
 function MyComponent() {
-  const {get, isEnabled, loading} = usePrefab();
-  const greeting = get('greeting') || 'Greetings';
+  const { get, isEnabled, loading } = usePrefab();
+  const greeting = get("greeting") || "Greetings";
 
   if (loading) {
     return <div>Loading...</div>;
@@ -96,7 +96,7 @@ function MyComponent() {
   return (
     <div>
       <h1 role="alert">{greeting}</h1>
-      {isEnabled('secretFeature') && (
+      {isEnabled("secretFeature") && (
         <button type="submit" title="secret-feature">
           Secret feature
         </button>
