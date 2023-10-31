@@ -42,6 +42,7 @@ type Props = {
   onError?: (error: Error) => void;
   afterEvaluationCallback?: EvaluationCallback;
   collectEvaluationSummaries?: boolean;
+  collectLoggerNames?: boolean;
 };
 
 function PrefabProvider({
@@ -56,6 +57,7 @@ function PrefabProvider({
   pollInterval,
   afterEvaluationCallback = undefined,
   collectEvaluationSummaries = false,
+  collectLoggerNames = false,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -86,6 +88,7 @@ function PrefabProvider({
       apiEndpoint,
       afterEvaluationCallback,
       collectEvaluationSummaries,
+      collectLoggerNames,
     };
 
     if (identityAttributes) {
