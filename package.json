@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist/ && tsc --build --verbose",
+    "build": "rm -rf dist/ && ./build.sh",
     "test": "npm run build && jest --verbose dist/",
     "lint": "eslint --ext .ts,.tsx src/",
     "prettier": "prettier . -l",
@@ -17,7 +17,7 @@
   "author": "Jeffrey Chupp",
   "license": "ISC",
   "dependencies": {
-    "@prefab-cloud/prefab-cloud-js": "0.1.18"
+    "@prefab-cloud/prefab-cloud-js": "0.1.19"
   },
   "keywords": [
     "feature-flags",

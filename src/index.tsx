@@ -1,5 +1,6 @@
 import React, { PropsWithChildren } from "react";
 import { prefab, ConfigValue, Context, Identity } from "@prefab-cloud/prefab-cloud-js";
+import version from "./version";
 
 type IdentityAttributes = undefined | { [key: string]: any };
 
@@ -89,6 +90,7 @@ function PrefabProvider({
       afterEvaluationCallback,
       collectEvaluationSummaries,
       collectLoggerNames,
+      clientVersionString: `prefab-cloud-react-${version}`,
     };
 
     if (identityAttributes) {
