@@ -1,8 +1,12 @@
 Changelog
 
-## 0.1.20 - 2023-12-11
+## 0.1.21 - 2023-12-11
 
 - Use correct client version string
+
+## 0.1.20 - 2023-10-31
+
+- Opt-in param for logger telemetry
 
 ## 0.1.19 - 2023-10-24
 
