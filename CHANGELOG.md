@@ -3,6 +3,7 @@ Changelog
 ## Unreleased
 
 - Remove identity support. Use Context instead. (#30)
+- Re-fetch when context attributes change. (#31)
 
 ## 0.1.21 - 2023-12-11
 

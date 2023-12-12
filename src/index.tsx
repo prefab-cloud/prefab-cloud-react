@@ -6,7 +6,6 @@ type ContextAttributes = { [key: string]: Record<string, ConfigValue> };
 
 type ProvidedContext = {
   get: (key: string) => any;
-  hasStartedInit: boolean;
   contextAttributes: ContextAttributes;
   isEnabled: (key: string) => boolean;
   loading: boolean;
@@ -15,7 +14,6 @@ type ProvidedContext = {
 
 const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
-  hasStartedInit: false,
   isEnabled: (_: string) => false,
   loading: true,
   contextAttributes: {},
@@ -56,9 +54,9 @@ function PrefabProvider({
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
-  const hasStartedInit = React.useRef(false);
+  const mostRecentlyLoadingContextKey = React.useRef<string | undefined>(undefined);
   // We use this state to pass the loading state to the Provider (updating
-  // hasStartedInit won't trigger an update)
+  // currentLoadingContextKey won't trigger an update)
   const [loading, setLoading] = React.useState(true);
   // Here we track the current identity so we can reload our config when it
   // changes
@@ -71,32 +69,34 @@ function PrefabProvider({
     );
   }
 
+  const context = new Context(contextAttributes);
+  const contextKey = context.encode();
+
   React.useEffect(() => {
-    if (hasStartedInit.current) {
+    if (mostRecentlyLoadingContextKey.current === contextKey) {
       return;
     }
 
-    const initOptions: Parameters<typeof prefab.init>[0] = {
-      context: new Context(contextAttributes),
-      apiKey,
-      timeout,
-      endpoints,
-      apiEndpoint,
-      afterEvaluationCallback,
-      collectEvaluationSummaries,
-      collectLoggerNames,
-      clientVersionString: `prefab-cloud-react-${version}`,
-    };
+    setLoading(true);
 
-    const contextKey = initOptions.context.encode();
+    if (mostRecentlyLoadingContextKey.current === undefined) {
+      mostRecentlyLoadingContextKey.current = contextKey;
 
-    if (!hasStartedInit.current && loadedContextKey !== contextKey) {
-      hasStartedInit.current = true;
+      const initOptions: Parameters<typeof prefab.init>[0] = {
+        context,
+        apiKey,
+        timeout,
+        endpoints,
+        apiEndpoint,
+        afterEvaluationCallback,
+        collectEvaluationSummaries,
+        collectLoggerNames,
+        clientVersionString: `prefab-cloud-react-${version}`,
+      };
 
       prefab
         .init(initOptions)
         .then(() => {
-          hasStartedInit.current = false;
           setLoadedContextKey(contextKey);
           setLoading(false);
 
@@ -108,8 +108,21 @@ function PrefabProvider({
           setLoading(false);
           onError(reason);
         });
+    } else {
+      mostRecentlyLoadingContextKey.current = contextKey;
+
+      prefab
+        .updateContext(context)
+        .then(() => {
+          setLoadedContextKey(contextKey);
+          setLoading(false);
+        })
+        .catch((reason: any) => {
+          setLoading(false);
+          onError(reason);
+        });
     }
-  }, [apiKey, loadedContextKey, loading, setLoading, onError]);
+  }, [apiKey, loadedContextKey, contextKey, loading, setLoading, onError]);
 
   const value: ProvidedContext = React.useMemo(
     () => ({
@@ -118,7 +131,6 @@ function PrefabProvider({
       get: prefab.get.bind(prefab),
       prefab,
       loading,
-      hasStartedInit: hasStartedInit.current,
     }),
     [loadedContextKey, loading, prefab]
   );
@@ -134,13 +146,12 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
   const get = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
-  const value: ProvidedContext = React.useMemo(
-    () => ({
+  const value = React.useMemo(
+    (): ProvidedContext => ({
       isEnabled,
       contextAttributes: config.contextAttributes,
       get,
       loading: false,
-      hasStartedInit: true,
       prefab,
     }),
     [config]

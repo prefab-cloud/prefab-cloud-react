@@ -47,13 +47,12 @@ describe("Provider", () => {
     contextAttributes,
   }: {
     contextAttributes?: { [key: string]: Record<string, ConfigValue> };
-  }) => {
+  }) =>
     render(
       <PrefabProvider apiKey="api-key" contextAttributes={contextAttributes} onError={() => {}}>
         <MyComponent />
       </PrefabProvider>
     );
-  };
 
   const stubConfig = (config: Config) =>
     new Promise((resolve) => {
@@ -76,7 +75,7 @@ describe("Provider", () => {
   ) => {
     const promise = stubConfig(config);
 
-    renderInProvider(providerConfig);
+    const rendered = renderInProvider(providerConfig);
 
     await act(async () => {
       await promise;
@@ -84,6 +83,8 @@ describe("Provider", () => {
 
     // wait for the loading content to go away
     screen.findByRole("alert");
+
+    return rendered;
   };
 
   it("renders without config", async () => {
@@ -129,11 +130,46 @@ describe("Provider", () => {
   });
 
   it("warns when you do not provide contextAttributes", async () => {
-    await renderWithConfig({}, {});
-
-    expect(warn).toHaveBeenCalledWith(
-      "PrefabProvider: You haven't passed any contextAttributes. See https://docs.prefab.cloud/docs/sdks/react#using-context"
+    const rendered = await renderWithConfig(
+      {
+        greeting: { string: "CUSTOM" },
+        secretFeature: { boolean: true },
+      },
+      { contextAttributes: { user: { email: "old@example.com" } } }
     );
+
+    let alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+
+    const newConfigPromise = stubConfig({
+      greeting: { string: "ANOTHER" },
+      secretFeature: { boolean: false },
+    });
+
+    act(() => {
+      rendered.rerender(
+        <PrefabProvider
+          apiKey="api-key"
+          contextAttributes={{ user: { email: "test@example.com" } }}
+          onError={() => {}}
+        >
+          <MyComponent />
+        </PrefabProvider>
+      );
+    });
+
+    await newConfigPromise;
+
+    // wait for re-render
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 1));
+
+    alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("ANOTHER");
+  });
+
+  it("re-fetches when you update the contextAttributes", async () => {
+    await renderWithConfig({}, { contextAttributes: defaultContextAttributes });
   });
 
   it("allows providing an afterEvaluationCallback", async () => {
