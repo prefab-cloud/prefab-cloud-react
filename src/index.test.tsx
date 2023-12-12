@@ -45,18 +45,11 @@ describe("Provider", () => {
 
   const renderInProvider = ({
     contextAttributes,
-    identityAttributes,
   }: {
     contextAttributes?: { [key: string]: Record<string, ConfigValue> };
-    identityAttributes?: { [key: string]: any };
   }) => {
     render(
-      <PrefabProvider
-        apiKey="api-key"
-        contextAttributes={contextAttributes}
-        identityAttributes={identityAttributes}
-        onError={() => {}}
-      >
+      <PrefabProvider apiKey="api-key" contextAttributes={contextAttributes} onError={() => {}}>
         <MyComponent />
       </PrefabProvider>
     );
@@ -135,17 +128,7 @@ describe("Provider", () => {
     expect(secretFeature).not.toBeInTheDocument();
   });
 
-  it("warns when provided identityAttributes", async () => {
-    const identityAttributes = { email: "test@example.com" };
-
-    await renderWithConfig({}, { identityAttributes });
-
-    expect(warn).toHaveBeenCalledWith(
-      "identityAttributes is deprecated and will be removed in a future release. Please use contextAttributes instead"
-    );
-  });
-
-  it("warns when you provide neither contextAttributes or identityAttributes", async () => {
+  it("warns when you do not provide contextAttributes", async () => {
     await renderWithConfig({}, {});
 
     expect(warn).toHaveBeenCalledWith(
