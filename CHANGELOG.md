@@ -1,5 +1,9 @@
 Changelog
 
+## Unreleased
+
+- Remove identity support. Use Context instead. (#30)
+
 ## 0.1.21 - 2023-12-11
 
 - Use correct client version string
