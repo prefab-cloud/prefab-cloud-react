@@ -1,5 +1,9 @@
 Changelog
 
+## 0.2.1 - 2024-01-11
+
+- Fix default endpoint for telemetry
+
 ## 0.2.0 - 2023-12-12
 
 - Remove identity support. Use Context instead. (#30)
