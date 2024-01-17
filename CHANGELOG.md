@@ -1,5 +1,9 @@
 Changelog
 
+## 0.2.2 - 2024-01-17
+
+- Updates to errors and warnings
+
 ## 0.2.1 - 2024-01-11
 
 - Fix default endpoint for telemetry
