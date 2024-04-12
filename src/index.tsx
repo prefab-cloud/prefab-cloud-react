@@ -10,11 +10,13 @@ type ProvidedContext = {
   isEnabled: (key: string) => boolean;
   loading: boolean;
   prefab: typeof prefab;
+  keys: string[];
 };
 
 const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
   isEnabled: (_: string) => false,
+  keys: [],
   loading: true,
   contextAttributes: {},
   prefab,
@@ -129,6 +131,7 @@ function PrefabProvider({
       isEnabled: prefab.isEnabled.bind(prefab),
       contextAttributes,
       get: prefab.get.bind(prefab),
+      keys: Object.keys(prefab.configs),
       prefab,
       loading,
     }),
@@ -153,6 +156,7 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
       get,
       loading: false,
       prefab,
+      keys: Object.keys(config),
     }),
     [config]
   );

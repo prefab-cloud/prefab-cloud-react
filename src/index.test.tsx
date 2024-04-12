@@ -8,7 +8,7 @@ import { PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
 type Config = { [key: string]: any };
 
 function MyComponent() {
-  const { get, isEnabled, loading } = usePrefab();
+  const { get, isEnabled, loading, keys } = usePrefab();
   const greeting = get("greeting") || "Default";
 
   if (loading) {
@@ -23,6 +23,8 @@ function MyComponent() {
           Secret feature
         </button>
       )}
+
+      <pre data-testid="known-keys">{JSON.stringify(keys)}</pre>
     </div>
   );
 }
@@ -247,5 +249,12 @@ describe("TestProvider", () => {
     expect(alert).toHaveTextContent("CUSTOM");
     const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
+  });
+
+  it("allows access to the known keys", () => {
+    renderInTestProvider({ magic: "true", keanu: "whoa" });
+
+    const keys = screen.getByTestId("known-keys");
+    expect(keys).toHaveTextContent('["magic","keanu"]');
   });
 });
