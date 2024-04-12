@@ -76,6 +76,8 @@ Here's an explanation of each property:
 | `get`               | `get('retry-count')`    | returns the value of a flag or config                                                    |
 | `loading`           | `if (loading) { ... }`  | a boolean indicating whether prefab content is being loaded                              |
 | `contextAttributes` | N/A                     | this is the context attributes object you passed when setting up the provider            |
+| `prefab`            | N/A                     | the underlying JavaScript prefab instance                                                |
+| `keys`              | N/A                     | an array of all the flag and config names in the current configuration                   |
 
 ## Usage in your test suite
 
