@@ -1,5 +1,9 @@
 Changelog
 
+## 0.2.3 - 2024-04-12
+
+- Expose known keys (#36)
+
 ## 0.2.2 - 2024-01-17
 
 - Updates to errors and warnings
