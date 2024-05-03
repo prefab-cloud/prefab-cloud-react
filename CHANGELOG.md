@@ -1,5 +1,9 @@
 Changelog
 
+## 0.2.4 - 20204-05-03
+
+- Support for JSON config values
+
 ## 0.2.3 - 2024-04-12
 
 - Expose known keys (#36)
