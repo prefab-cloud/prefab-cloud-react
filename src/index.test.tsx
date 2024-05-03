@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { act } from "react-dom/test-utils";
-import { ConfigValue } from "@prefab-cloud/prefab-cloud-js";
+import { ContextValue } from "@prefab-cloud/prefab-cloud-js";
 import { PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
 
 type Config = { [key: string]: any };
@@ -10,6 +10,7 @@ type Config = { [key: string]: any };
 function MyComponent() {
   const { get, isEnabled, loading, keys } = usePrefab();
   const greeting = get("greeting") || "Default";
+  const subtitle = get("subtitle")?.actualSubtitle || "Default Subtitle";
 
   if (loading) {
     return <div>Loading...</div>;
@@ -18,6 +19,7 @@ function MyComponent() {
   return (
     <div>
       <h1 role="alert">{greeting}</h1>
+      <h2 role="banner">{subtitle}</h2>
       {isEnabled("secretFeature") && (
         <button type="submit" title="secret-feature">
           Secret feature
@@ -48,7 +50,7 @@ describe("Provider", () => {
   const renderInProvider = ({
     contextAttributes,
   }: {
-    contextAttributes?: { [key: string]: Record<string, ConfigValue> };
+    contextAttributes?: { [key: string]: Record<string, ContextValue> };
   }) =>
     render(
       <PrefabProvider apiKey="api-key" contextAttributes={contextAttributes} onError={() => {}}>
@@ -129,6 +131,15 @@ describe("Provider", () => {
     expect(alert).toHaveTextContent("CUSTOM");
     const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
+  });
+
+  it("allows providing json configs", async () => {
+    await renderWithConfig({
+      subtitle: { json: { json: '{ "actualSubtitle": "Json Subtitle" }' } },
+    });
+
+    const alert = screen.queryByRole("banner");
+    expect(alert).toHaveTextContent("Json Subtitle");
   });
 
   it("warns when you do not provide contextAttributes", async () => {

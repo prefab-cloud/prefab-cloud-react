@@ -2,7 +2,8 @@ import React, { PropsWithChildren } from "react";
 import { prefab, ConfigValue, Context } from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
 
-type ContextAttributes = { [key: string]: Record<string, ConfigValue> };
+type ContextValue = number | string | boolean;
+type ContextAttributes = { [key: string]: Record<string, ContextValue> };
 
 type ProvidedContext = {
   get: (key: string) => any;
