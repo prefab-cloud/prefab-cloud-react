@@ -1,6 +1,10 @@
 Changelog
 
-## 0.2.4 - 20204-05-03
+## 0.2.5 -2024-05-07
+
+- Remove `react-dom` from peerDependencies
+
+## 0.2.4 - 2024-05-03
 
 - Support for JSON config values
 
