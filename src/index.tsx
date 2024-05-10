@@ -165,4 +165,13 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
 }
 
-export { PrefabProvider, PrefabTestProvider, usePrefab, TestProps, Props, prefab };
+export {
+  PrefabProvider,
+  PrefabTestProvider,
+  usePrefab,
+  TestProps,
+  Props,
+  ConfigValue,
+  ContextAttributes,
+  prefab,
+};

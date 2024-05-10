@@ -1,6 +1,10 @@
 Changelog
 
-## 0.2.5 -2024-05-07
+## 0.2.6 - 2024-05-10
+
+- Export types for ConfigValue and ContextAttributes
+
+## 0.2.5 - 2024-05-07
 
 - Remove `react-dom` from peerDependencies
 
