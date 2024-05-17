@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { ConfigValue } from "@prefab-cloud/prefab-cloud-js";
-import { act } from "@testing-library/react";
 
 interface Props {
   requestedFlags: () => { key: string; value: ConfigValue }[];
@@ -33,9 +32,10 @@ function FlagToggleOverlay({ requestedFlags, overrides, addOverride }: Props) {
         right: "48px",
         borderColor: "#4352D1",
         boxShadow: "0px 0px 35px rgba(67,82,209,0.35)",
+        overflow: "hidden",
       }}
     >
-      <div className="p-4 rounded-xl" style={{ backgroundColor: "#4352D1" }}>
+      <div className="p-4" style={{ backgroundColor: "#4352D1" }}>
         <svg
           className="h-10 w-auto"
           width="703"
