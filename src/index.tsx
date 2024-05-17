@@ -1,6 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import { prefab, ConfigValue, Context } from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
+import FlagToggleOverlay from "./FlagToggleOverlay";
 
 type ContextValue = number | string | boolean;
 type ContextAttributes = { [key: string]: Record<string, ContextValue> };
@@ -40,6 +41,7 @@ type Props = {
   afterEvaluationCallback?: EvaluationCallback;
   collectEvaluationSummaries?: boolean;
   collectLoggerNames?: boolean;
+  allowTogglingUi?: boolean;
 };
 
 function PrefabProvider({
@@ -54,6 +56,7 @@ function PrefabProvider({
   afterEvaluationCallback = undefined,
   collectEvaluationSummaries = false,
   collectLoggerNames = false,
+  allowTogglingUi = false,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -64,6 +67,8 @@ function PrefabProvider({
   // Here we track the current identity so we can reload our config when it
   // changes
   const [loadedContextKey, setLoadedContextKey] = React.useState("");
+  // Here we store overrides for the flag toggling UI
+  const [overrides, setOverrides] = React.useState<Map<string, ConfigValue>>(new Map());
 
   if (Object.keys(contextAttributes).length === 0) {
     // eslint-disable-next-line no-console
@@ -129,17 +134,47 @@ function PrefabProvider({
 
   const value: ProvidedContext = React.useMemo(
     () => ({
-      isEnabled: prefab.isEnabled.bind(prefab),
+      isEnabled: (key: string) => {
+        console.log("isEnabled: ", key);
+        if (overrides.has(key)) {
+          return overrides.get(key) as boolean;
+        }
+        return prefab.isEnabled.bind(prefab)(key);
+      },
       contextAttributes,
-      get: prefab.get.bind(prefab),
+      get: (key: string) => {
+        console.log("get: ", key);
+        if (overrides.has(key)) {
+          return overrides.get(key);
+        }
+        return prefab.get.bind(prefab)(key);
+      },
       keys: Object.keys(prefab.configs),
       prefab,
       loading,
     }),
-    [loadedContextKey, loading, prefab]
+    [loadedContextKey, loading, prefab, overrides]
   );
 
-  return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
+  const requestedFlags = () => prefab.requestedFlags.bind(prefab)();
+
+  return (
+    <PrefabContext.Provider value={value}>
+      {children}
+      {allowTogglingUi && !loading && (
+        <FlagToggleOverlay
+          requestedFlags={requestedFlags}
+          overrides={overrides}
+          addOverride={(key, newValue) => {
+            console.log("addOverride: ", key, newValue);
+            const newOverrides = new Map(overrides);
+            newOverrides.set(key, newValue);
+            setOverrides(newOverrides);
+          }}
+        />
+      )}
+    </PrefabContext.Provider>
+  );
 }
 
 type TestProps = {
