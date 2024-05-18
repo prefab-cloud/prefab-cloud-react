@@ -13,6 +13,7 @@ function FlagToggleOverlay({ requestedFlags, overrides, addOverride, clearFlags 
   // const [currentPage, setCurrentPage] = useState(window.location.pathname);
 
   // poll for flags
+  // TODO turn this on and off based on whether the overlay is visible
   const [flags, setFlags] = useState(requestedFlags());
   useEffect(() => {
     const interval = setInterval(() => {
