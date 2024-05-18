@@ -77,6 +77,8 @@ function PrefabProvider({
     );
   }
 
+  const usageRef = React.useRef(new Map<string, ConfigValue>());
+
   const context = new Context(contextAttributes);
   const contextKey = context.encode();
 
@@ -135,19 +137,21 @@ function PrefabProvider({
   const value: ProvidedContext = React.useMemo(
     () => ({
       isEnabled: (key: string) => {
-        console.log("isEnabled: ", key);
         if (overrides.has(key)) {
           return overrides.get(key) as boolean;
         }
-        return prefab.isEnabled.bind(prefab)(key);
+        const result = prefab.isEnabled.bind(prefab)(key);
+        usageRef.current.set(key, result);
+        return result;
       },
       contextAttributes,
       get: (key: string) => {
-        console.log("get: ", key);
         if (overrides.has(key)) {
           return overrides.get(key);
         }
-        return prefab.get.bind(prefab)(key);
+        const result = prefab.get.bind(prefab)(key);
+        usageRef.current.set(key, result);
+        return result;
       },
       keys: Object.keys(prefab.configs),
       prefab,
@@ -156,7 +160,12 @@ function PrefabProvider({
     [loadedContextKey, loading, prefab, overrides]
   );
 
-  const requestedFlags = () => prefab.requestedFlags.bind(prefab)();
+  // const requestedFlags = () => prefab.requestedFlags.bind(prefab)();
+  const requestedFlags = () =>
+    Array.from(usageRef.current.entries()).map(([key, val]) => ({
+      key,
+      value: val,
+    }));
 
   return (
     <PrefabContext.Provider value={value}>
