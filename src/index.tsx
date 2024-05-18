@@ -162,10 +162,12 @@ function PrefabProvider({
 
   // const requestedFlags = () => prefab.requestedFlags.bind(prefab)();
   const requestedFlags = () =>
-    Array.from(usageRef.current.entries()).map(([key, val]) => ({
-      key,
-      value: val,
-    }));
+    Array.from(usageRef.current.entries())
+      .map(([key, val]) => ({
+        key,
+        value: val,
+      }))
+      .sort((a, b) => a.key.localeCompare(b.key));
 
   return (
     <PrefabContext.Provider value={value}>
@@ -179,6 +181,9 @@ function PrefabProvider({
             const newOverrides = new Map(overrides);
             newOverrides.set(key, newValue);
             setOverrides(newOverrides);
+          }}
+          clearFlags={() => {
+            usageRef.current.clear();
           }}
         />
       )}

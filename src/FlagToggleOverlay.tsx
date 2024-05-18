@@ -5,11 +5,24 @@ interface Props {
   requestedFlags: () => { key: string; value: ConfigValue }[];
   overrides: Map<string, ConfigValue>;
   addOverride: (key: string, value: ConfigValue) => void;
+  clearFlags: () => void;
 }
 
-function FlagToggleOverlay({ requestedFlags, overrides, addOverride }: Props) {
+function FlagToggleOverlay({ requestedFlags, overrides, addOverride, clearFlags }: Props) {
   const [showOverlay, setShowOverlay] = useState(false);
+  // const [currentPage, setCurrentPage] = useState(window.location.pathname);
 
+  // poll for flags
+  const [flags, setFlags] = useState(requestedFlags());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFlags(requestedFlags());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // setup keyboard shortcut listener to toggle overlay
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "f") {
@@ -20,6 +33,58 @@ function FlagToggleOverlay({ requestedFlags, overrides, addOverride }: Props) {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // setup listeners for page changes
+  React.useEffect(() => {
+    const handlePopState = () => {
+      clearFlags();
+      setCurrentPage(window.location.pathname);
+    };
+
+    const patchHistoryMethods = () => {
+      const originalPushState = window.history.pushState;
+      const originalReplaceState = window.history.replaceState;
+
+      window.history.pushState = function (
+        state: any,
+        unused: string,
+        url?: string | URL | null | undefined
+      ) {
+        const result = originalPushState.apply(window.history, [state, unused, url]);
+        window.dispatchEvent(new Event("pushState"));
+        return result;
+      };
+
+      window.history.replaceState = function (
+        state: any,
+        unused: string,
+        url?: string | URL | null | undefined
+      ) {
+        const result = originalReplaceState.apply(window.history, [state, unused, url]);
+        window.dispatchEvent(new Event("replaceState"));
+        return result;
+      };
+
+      window.addEventListener("pushState", handlePopState);
+      window.addEventListener("replaceState", handlePopState);
+
+      return () => {
+        window.removeEventListener("pushState", handlePopState);
+        window.removeEventListener("replaceState", handlePopState);
+        window.history.pushState = originalPushState;
+        window.history.replaceState = originalReplaceState;
+      };
+    };
+
+    const unpatchHistoryMethods = patchHistoryMethods();
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      unpatchHistoryMethods();
+    };
   }, []);
 
   if (!showOverlay) return null;
@@ -80,7 +145,7 @@ function FlagToggleOverlay({ requestedFlags, overrides, addOverride }: Props) {
       <div className="p-8 flex flex-col font-sm">
         <div className="font-bold text-lg">Feature Flags</div>
         <ul>
-          {requestedFlags().map(({ key, value }) => {
+          {flags.map(({ key, value }) => {
             const actualValue = overrides.has(key) ? overrides.get(key) : value;
 
             return (
