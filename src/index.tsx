@@ -172,6 +172,7 @@ function PrefabProvider({
   return (
     <PrefabContext.Provider value={value}>
       {children}
+      {/* TODO: not sure this actually has to block on loading any more */}
       {allowTogglingUi && !loading && (
         <FlagToggleOverlay
           requestedFlags={requestedFlags}
