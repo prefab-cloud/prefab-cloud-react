@@ -1,30 +1,9 @@
 import React, { PropsWithChildren } from "react";
 import { prefab, ConfigValue, Context } from "@prefab-cloud/prefab-cloud-js";
-import version from "./version";
+
 import FlagToggleOverlay from "./FlagToggleOverlay";
-
-type ContextValue = number | string | boolean;
-type ContextAttributes = { [key: string]: Record<string, ContextValue> };
-
-type ProvidedContext = {
-  get: (key: string) => any;
-  contextAttributes: ContextAttributes;
-  isEnabled: (key: string) => boolean;
-  loading: boolean;
-  prefab: typeof prefab;
-  keys: string[];
-};
-
-const defaultContext: ProvidedContext = {
-  get: (_: string) => undefined,
-  isEnabled: (_: string) => false,
-  keys: [],
-  loading: true,
-  contextAttributes: {},
-  prefab,
-};
-
-const PrefabContext = React.createContext(defaultContext);
+import { ContextAttributes, PrefabContext, ProvidedContext } from "./types";
+import version from "./version";
 
 const usePrefab = () => React.useContext(PrefabContext);
 
@@ -41,7 +20,6 @@ type Props = {
   afterEvaluationCallback?: EvaluationCallback;
   collectEvaluationSummaries?: boolean;
   collectLoggerNames?: boolean;
-  allowTogglingUi?: boolean;
 };
 
 function PrefabProvider({
@@ -56,7 +34,6 @@ function PrefabProvider({
   afterEvaluationCallback = undefined,
   collectEvaluationSummaries = false,
   collectLoggerNames = false,
-  allowTogglingUi = false,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -67,8 +44,6 @@ function PrefabProvider({
   // Here we track the current identity so we can reload our config when it
   // changes
   const [loadedContextKey, setLoadedContextKey] = React.useState("");
-  // Here we store overrides for the flag toggling UI
-  const [overrides, setOverrides] = React.useState<Map<string, ConfigValue>>(new Map());
 
   if (Object.keys(contextAttributes).length === 0) {
     // eslint-disable-next-line no-console
@@ -76,8 +51,6 @@ function PrefabProvider({
       "PrefabProvider: You haven't passed any contextAttributes. See https://docs.prefab.cloud/docs/sdks/react#using-context"
     );
   }
-
-  const usageRef = React.useRef(new Map<string, ConfigValue>());
 
   const context = new Context(contextAttributes);
   const contextKey = context.encode();
@@ -136,60 +109,17 @@ function PrefabProvider({
 
   const value: ProvidedContext = React.useMemo(
     () => ({
-      isEnabled: (key: string) => {
-        if (overrides.has(key)) {
-          return overrides.get(key) as boolean;
-        }
-        const result = prefab.isEnabled.bind(prefab)(key);
-        usageRef.current.set(key, result);
-        return result;
-      },
+      isEnabled: prefab.isEnabled.bind(prefab),
       contextAttributes,
-      get: (key: string) => {
-        if (overrides.has(key)) {
-          return overrides.get(key);
-        }
-        const result = prefab.get.bind(prefab)(key);
-        usageRef.current.set(key, result);
-        return result;
-      },
+      get: prefab.get.bind(prefab),
       keys: Object.keys(prefab.configs),
       prefab,
       loading,
     }),
-    [loadedContextKey, loading, prefab, overrides]
+    [loadedContextKey, loading, prefab]
   );
 
-  // const requestedFlags = () => prefab.requestedFlags.bind(prefab)();
-  const requestedFlags = () =>
-    Array.from(usageRef.current.entries())
-      .map(([key, val]) => ({
-        key,
-        value: val,
-      }))
-      .sort((a, b) => a.key.localeCompare(b.key));
-
-  return (
-    <PrefabContext.Provider value={value}>
-      {children}
-      {/* TODO: not sure this actually has to block on loading any more */}
-      {allowTogglingUi && !loading && (
-        <FlagToggleOverlay
-          requestedFlags={requestedFlags}
-          overrides={overrides}
-          addOverride={(key, newValue) => {
-            console.log("addOverride: ", key, newValue);
-            const newOverrides = new Map(overrides);
-            newOverrides.set(key, newValue);
-            setOverrides(newOverrides);
-          }}
-          clearFlags={() => {
-            usageRef.current.clear();
-          }}
-        />
-      )}
-    </PrefabContext.Provider>
-  );
+  return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
 }
 
 type TestProps = {
@@ -218,6 +148,7 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
 export {
   PrefabProvider,
   PrefabTestProvider,
+  FlagToggleOverlay,
   usePrefab,
   TestProps,
   Props,
