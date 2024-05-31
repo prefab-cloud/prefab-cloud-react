@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { prefab, ConfigValue, Context } from "@prefab-cloud/prefab-cloud-js";
+import { prefab, ConfigValue, Context, Duration } from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
 
 type ContextValue = number | string | boolean;
@@ -7,6 +7,7 @@ type ContextAttributes = { [key: string]: Record<string, ContextValue> };
 
 type ProvidedContext = {
   get: (key: string) => any;
+  getDuration(key: string): Duration | undefined;
   contextAttributes: ContextAttributes;
   isEnabled: (key: string) => boolean;
   loading: boolean;
@@ -16,6 +17,7 @@ type ProvidedContext = {
 
 const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
+  getDuration: (_: string) => undefined,
   isEnabled: (_: string) => false,
   keys: [],
   loading: true,
@@ -132,6 +134,7 @@ function PrefabProvider({
       isEnabled: prefab.isEnabled.bind(prefab),
       contextAttributes,
       get: prefab.get.bind(prefab),
+      getDuration: prefab.getDuration.bind(prefab),
       keys: Object.keys(prefab.configs),
       prefab,
       loading,
@@ -148,6 +151,7 @@ type TestProps = {
 
 function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) {
   const get = (key: string) => config[key];
+  const getDuration = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
   const value = React.useMemo(
@@ -155,6 +159,7 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
       isEnabled,
       contextAttributes: config.contextAttributes,
       get,
+      getDuration,
       loading: false,
       prefab,
       keys: Object.keys(config),

@@ -1,2 +1,2 @@
 // THIS FILE IS GENERATED
-export default "0.2.5";
+export default "0.2.6";
