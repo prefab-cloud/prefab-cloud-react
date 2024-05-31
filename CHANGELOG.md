@@ -1,5 +1,9 @@
 Changelog
 
+## 0.2.7 - 2024-05-31
+
+- Support durations
+
 ## 0.2.6 - 2024-05-10
 
 - Export types for ConfigValue and ContextAttributes
