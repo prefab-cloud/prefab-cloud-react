@@ -8,5 +8,6 @@ echo "Building version $version"
 
 echo "// THIS FILE IS GENERATED" >src/version.ts
 echo "export default \"$version\";" >>src/version.ts
+git add src/version.ts
 
 tsc

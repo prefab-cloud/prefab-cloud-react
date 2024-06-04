@@ -1,5 +1,9 @@
 Changelog
 
+## 0.3.0 - 2024-06-04
+
+- collectEvaluationSummaries is now opt-out (#42)
+
 ## 0.2.7 - 2024-05-31
 
 - Support durations
