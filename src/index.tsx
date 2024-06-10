@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { prefab, ConfigValue, Context, Duration } from "@prefab-cloud/prefab-cloud-js";
+import { prefab, ConfigValue, Context, Duration, Prefab } from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
 
 type ContextValue = number | string | boolean;
@@ -26,6 +26,7 @@ const defaultContext: ProvidedContext = {
 };
 
 const PrefabContext = React.createContext(defaultContext);
+PrefabContext.displayName = "PrefabContext";
 
 const usePrefab = () => React.useContext(PrefabContext);
 
@@ -42,6 +43,7 @@ type Props = {
   afterEvaluationCallback?: EvaluationCallback;
   collectEvaluationSummaries?: boolean;
   collectLoggerNames?: boolean;
+  ContextToUse?: React.Context<ProvidedContext>;
 };
 
 function PrefabProvider({
@@ -56,6 +58,7 @@ function PrefabProvider({
   afterEvaluationCallback = undefined,
   collectEvaluationSummaries = false,
   collectLoggerNames = false,
+  ContextToUse = PrefabContext,
 }: PropsWithChildren<Props>) {
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -66,6 +69,11 @@ function PrefabProvider({
   // Here we track the current identity so we can reload our config when it
   // changes
   const [loadedContextKey, setLoadedContextKey] = React.useState("");
+
+  const prefabClient: Prefab = React.useMemo(
+    () => (ContextToUse.displayName === PrefabContext.displayName ? prefab : new Prefab()),
+    [ContextToUse.displayName]
+  );
 
   if (Object.keys(contextAttributes).length === 0) {
     // eslint-disable-next-line no-console
@@ -87,7 +95,7 @@ function PrefabProvider({
     if (mostRecentlyLoadingContextKey.current === undefined) {
       mostRecentlyLoadingContextKey.current = contextKey;
 
-      const initOptions: Parameters<typeof prefab.init>[0] = {
+      const initOptions: Parameters<typeof prefabClient.init>[0] = {
         context,
         apiKey,
         timeout,
@@ -99,14 +107,14 @@ function PrefabProvider({
         clientVersionString: `prefab-cloud-react-${version}`,
       };
 
-      prefab
+      prefabClient
         .init(initOptions)
         .then(() => {
           setLoadedContextKey(contextKey);
           setLoading(false);
 
           if (pollInterval) {
-            prefab.poll({ frequencyInMs: pollInterval });
+            prefabClient.poll({ frequencyInMs: pollInterval });
           }
         })
         .catch((reason: any) => {
@@ -116,7 +124,7 @@ function PrefabProvider({
     } else {
       mostRecentlyLoadingContextKey.current = contextKey;
 
-      prefab
+      prefabClient
         .updateContext(context)
         .then(() => {
           setLoadedContextKey(contextKey);
@@ -131,24 +139,25 @@ function PrefabProvider({
 
   const value: ProvidedContext = React.useMemo(
     () => ({
-      isEnabled: prefab.isEnabled.bind(prefab),
+      isEnabled: prefabClient.isEnabled.bind(prefabClient),
       contextAttributes,
-      get: prefab.get.bind(prefab),
-      getDuration: prefab.getDuration.bind(prefab),
-      keys: Object.keys(prefab.configs),
-      prefab,
+      get: prefabClient.get.bind(prefabClient),
+      getDuration: prefabClient.getDuration.bind(prefabClient),
+      keys: Object.keys(prefabClient.configs),
+      prefab: prefabClient,
       loading,
     }),
-    [loadedContextKey, loading, prefab]
+    [loadedContextKey, loading, prefabClient]
   );
 
-  return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
+  return <ContextToUse.Provider value={value}>{children}</ContextToUse.Provider>;
 }
 
 type TestProps = {
   config: Record<string, any>;
 };
 
+// TODO: would need to update this to allow for multiple instances as well
 function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) {
   const get = (key: string) => config[key];
   const getDuration = (key: string) => config[key];
@@ -179,4 +188,5 @@ export {
   ConfigValue,
   ContextAttributes,
   prefab,
+  defaultContext,
 };
