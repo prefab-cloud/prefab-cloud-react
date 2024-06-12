@@ -8,6 +8,8 @@ function FlagToggleOverlay({ children }: { children: React.ReactNode | undefined
   const [flags, setFlags] = useState<{ key: string; value: ConfigValue }[]>([]);
   const [overrides, setOverrides] = useState<Map<string, ConfigValue>>(new Map());
 
+  // we can't keep track of usage in a state variable,
+  // because evaluation calls from child component render methods would trigger an infinite render loop
   const usageRef = useRef(new Map<string, ConfigValue>());
 
   const addOverride = (key: string, value: ConfigValue) => {
@@ -49,15 +51,19 @@ function FlagToggleOverlay({ children }: { children: React.ReactNode | undefined
     [parentContext, overrides]
   );
 
-  // poll for flags
-  // TODO turn this on and off based on whether the overlay is visible
+  // changes to the data in usageRef don't trigger a render,
+  // so we need to poll for changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setFlags(Array.from(usageRef.current.entries()).map(([key, value]) => ({ key, value })));
-    }, 1000);
+    if (showOverlay) {
+      const interval = setInterval(() => {
+        setFlags(Array.from(usageRef.current.entries()).map(([key, value]) => ({ key, value })));
+      }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+
+    return () => {};
+  }, [showOverlay]);
 
   // setup keyboard shortcut listener to toggle overlay
   useEffect(() => {
@@ -201,7 +207,7 @@ function FlagToggleOverlay({ children }: { children: React.ReactNode | undefined
                           addOverride(key, overrides.has(key) ? !overrides.get(key) : !value);
                         }}
                       />
-                      <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      <div className="after:ml-0.5 relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                       <span className="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
                         {key}
                       </span>
