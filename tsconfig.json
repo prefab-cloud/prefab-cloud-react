@@ -1,5 +1,11 @@
 {
-  "files": ["src/index.tsx", "src/index.test.tsx", "src/jest.setup.ts"],
+  "files": [
+    "src/index.tsx",
+    "src/index.test.tsx",
+    "src/nested-providers.test.tsx",
+    "src/nested-test-providers.test.tsx",
+    "src/jest.setup.ts"
+  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 

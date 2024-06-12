@@ -1,5 +1,5 @@
 import React, { PropsWithChildren } from "react";
-import { prefab, ConfigValue, Context, Duration } from "@prefab-cloud/prefab-cloud-js";
+import { prefab, ConfigValue, Context, Duration, Prefab } from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
 
 type ContextValue = number | string | boolean;
@@ -15,7 +15,7 @@ type ProvidedContext = {
   keys: string[];
 };
 
-const defaultContext: ProvidedContext = {
+export const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
   getDuration: (_: string) => undefined,
   isEnabled: (_: string) => false,
@@ -30,6 +30,17 @@ const PrefabContext = React.createContext(defaultContext);
 const usePrefab = () => React.useContext(PrefabContext);
 
 type EvaluationCallback = (key: string, value: ConfigValue, context: Context | undefined) => void;
+
+let globalPrefabIsTaken = false;
+
+const assignPrefabClient = () => {
+  if (globalPrefabIsTaken) {
+    return new Prefab();
+  }
+
+  globalPrefabIsTaken = true;
+  return prefab;
+};
 
 type Props = {
   apiKey: string;
@@ -67,6 +78,8 @@ function PrefabProvider({
   // changes
   const [loadedContextKey, setLoadedContextKey] = React.useState("");
 
+  const prefabClient: Prefab = React.useMemo(() => assignPrefabClient(), []);
+
   if (Object.keys(contextAttributes).length === 0) {
     // eslint-disable-next-line no-console
     console.warn(
@@ -87,7 +100,7 @@ function PrefabProvider({
     if (mostRecentlyLoadingContextKey.current === undefined) {
       mostRecentlyLoadingContextKey.current = contextKey;
 
-      const initOptions: Parameters<typeof prefab.init>[0] = {
+      const initOptions: Parameters<typeof prefabClient.init>[0] = {
         context,
         apiKey,
         timeout,
@@ -99,14 +112,14 @@ function PrefabProvider({
         clientVersionString: `prefab-cloud-react-${version}`,
       };
 
-      prefab
+      prefabClient
         .init(initOptions)
         .then(() => {
           setLoadedContextKey(contextKey);
           setLoading(false);
 
           if (pollInterval) {
-            prefab.poll({ frequencyInMs: pollInterval });
+            prefabClient.poll({ frequencyInMs: pollInterval });
           }
         })
         .catch((reason: any) => {
@@ -116,7 +129,7 @@ function PrefabProvider({
     } else {
       mostRecentlyLoadingContextKey.current = contextKey;
 
-      prefab
+      prefabClient
         .updateContext(context)
         .then(() => {
           setLoadedContextKey(contextKey);
@@ -127,19 +140,27 @@ function PrefabProvider({
           onError(reason);
         });
     }
-  }, [apiKey, loadedContextKey, contextKey, loading, setLoading, onError]);
+  }, [
+    apiKey,
+    loadedContextKey,
+    contextKey,
+    loading,
+    setLoading,
+    onError,
+    prefabClient?.instanceHash,
+  ]);
 
   const value: ProvidedContext = React.useMemo(
     () => ({
-      isEnabled: prefab.isEnabled.bind(prefab),
+      isEnabled: prefabClient.isEnabled.bind(prefabClient),
       contextAttributes,
-      get: prefab.get.bind(prefab),
-      getDuration: prefab.getDuration.bind(prefab),
-      keys: Object.keys(prefab.configs),
-      prefab,
+      get: prefabClient.get.bind(prefabClient),
+      getDuration: prefabClient.getDuration.bind(prefabClient),
+      keys: Object.keys(prefabClient.configs),
+      prefab: prefabClient,
       loading,
     }),
-    [loadedContextKey, loading, prefab]
+    [loadedContextKey, loading, prefabClient]
   );
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
@@ -154,18 +175,22 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
   const getDuration = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
 
-  const value = React.useMemo(
-    (): ProvidedContext => ({
+  const value = React.useMemo((): ProvidedContext => {
+    const prefabClient = assignPrefabClient();
+    prefabClient.get = get;
+    prefabClient.getDuration = getDuration;
+    prefabClient.isEnabled = isEnabled;
+
+    return {
       isEnabled,
       contextAttributes: config.contextAttributes,
       get,
       getDuration,
       loading: false,
-      prefab,
+      prefab: prefabClient,
       keys: Object.keys(config),
-    }),
-    [config]
-  );
+    };
+  }, [config]);
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
 }
