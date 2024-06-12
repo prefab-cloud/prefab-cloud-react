@@ -5,6 +5,20 @@ import version from "./version";
 type ContextValue = number | string | boolean;
 type ContextAttributes = { [key: string]: Record<string, ContextValue> };
 
+type EvaluationCallback = (key: string, value: ConfigValue, context: Context | undefined) => void;
+
+type SharedSettings = {
+  apiKey?: string;
+  endpoints?: string[];
+  apiEndpoint?: string;
+  timeout?: number;
+  pollInterval?: number;
+  onError?: (error: Error) => void;
+  afterEvaluationCallback?: EvaluationCallback;
+  collectEvaluationSummaries?: boolean;
+  collectLoggerNames?: boolean;
+};
+
 type ProvidedContext = {
   get: (key: string) => any;
   getDuration(key: string): Duration | undefined;
@@ -13,6 +27,7 @@ type ProvidedContext = {
   loading: boolean;
   prefab: typeof prefab;
   keys: string[];
+  settings: SharedSettings;
 };
 
 export const defaultContext: ProvidedContext = {
@@ -23,13 +38,12 @@ export const defaultContext: ProvidedContext = {
   loading: true,
   contextAttributes: {},
   prefab,
+  settings: {},
 };
 
 const PrefabContext = React.createContext(defaultContext);
 
 const usePrefab = () => React.useContext(PrefabContext);
-
-type EvaluationCallback = (key: string, value: ConfigValue, context: Context | undefined) => void;
 
 let globalPrefabIsTaken = false;
 
@@ -42,32 +56,65 @@ const assignPrefabClient = () => {
   return prefab;
 };
 
-type Props = {
-  apiKey: string;
+type Props = SharedSettings & {
   contextAttributes?: ContextAttributes;
-  endpoints?: string[];
-  apiEndpoint?: string;
-  timeout?: number;
-  pollInterval?: number;
-  onError?: (error: Error) => void;
-  afterEvaluationCallback?: EvaluationCallback;
-  collectEvaluationSummaries?: boolean;
-  collectLoggerNames?: boolean;
+  inheritSettingsFromParentProvider?: boolean;
+};
+const defaultOnError = () => {};
+const defaultCollectEvaluationSummaries = false;
+const defaultCollectLoggerNames = false;
+
+let sharedSettings: SharedSettings = {};
+
+const resetSharedSettings = () => {
+  sharedSettings = {};
 };
 
 function PrefabProvider({
   apiKey,
   contextAttributes = {},
-  onError = () => {},
+  onError = defaultOnError,
   children,
   timeout,
   endpoints,
   apiEndpoint,
   pollInterval,
   afterEvaluationCallback = undefined,
-  collectEvaluationSummaries = false,
-  collectLoggerNames = false,
+  collectEvaluationSummaries = defaultCollectEvaluationSummaries,
+  collectLoggerNames = defaultCollectLoggerNames,
+  inheritSettingsFromParentProvider = true,
 }: PropsWithChildren<Props>) {
+  if (inheritSettingsFromParentProvider && Object.keys(sharedSettings).length > 0) {
+    /* eslint-disable no-param-reassign */
+    apiKey = sharedSettings.apiKey;
+    endpoints = sharedSettings.endpoints;
+    apiEndpoint = sharedSettings.apiEndpoint;
+    timeout = sharedSettings.timeout;
+    pollInterval = sharedSettings.pollInterval;
+    onError = sharedSettings.onError ?? defaultOnError;
+    afterEvaluationCallback = sharedSettings.afterEvaluationCallback;
+    collectEvaluationSummaries =
+      sharedSettings.collectEvaluationSummaries ?? defaultCollectEvaluationSummaries;
+    collectLoggerNames = sharedSettings.collectLoggerNames ?? defaultCollectLoggerNames;
+    /* eslint-enable no-param-reassign */
+  }
+
+  const settings = {
+    apiKey,
+    endpoints,
+    apiEndpoint,
+    timeout,
+    pollInterval,
+    onError,
+    afterEvaluationCallback,
+    collectEvaluationSummaries,
+    collectLoggerNames,
+  };
+
+  if (Object.keys(sharedSettings).length === 0) {
+    sharedSettings = settings;
+  }
+
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
   const mostRecentlyLoadingContextKey = React.useRef<string | undefined>(undefined);
@@ -100,15 +147,14 @@ function PrefabProvider({
     if (mostRecentlyLoadingContextKey.current === undefined) {
       mostRecentlyLoadingContextKey.current = contextKey;
 
+      if (!apiKey) {
+        throw new Error("PrefabProvider: apiKey is required");
+      }
+
       const initOptions: Parameters<typeof prefabClient.init>[0] = {
         context,
+        ...settings,
         apiKey,
-        timeout,
-        endpoints,
-        apiEndpoint,
-        afterEvaluationCallback,
-        collectEvaluationSummaries,
-        collectLoggerNames,
         clientVersionString: `prefab-cloud-react-${version}`,
       };
 
@@ -159,8 +205,9 @@ function PrefabProvider({
       keys: Object.keys(prefabClient.configs),
       prefab: prefabClient,
       loading,
+      settings,
     }),
-    [loadedContextKey, loading, prefabClient]
+    [loadedContextKey, loading, prefabClient, settings]
   );
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
@@ -189,6 +236,7 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
       loading: false,
       prefab: prefabClient,
       keys: Object.keys(config),
+      settings: {},
     };
   }, [config]);
 
@@ -204,4 +252,6 @@ export {
   ConfigValue,
   ContextAttributes,
   prefab,
+  resetSharedSettings,
+  SharedSettings,
 };

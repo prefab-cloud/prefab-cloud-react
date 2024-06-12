@@ -1,7 +1,13 @@
 import React from "react";
 import "@testing-library/jest-dom/extend-expect";
 import { render, screen } from "@testing-library/react";
-import { prefab as globalPrefab, PrefabTestProvider, usePrefab, TestProps } from "./index";
+import {
+  prefab as globalPrefab,
+  PrefabTestProvider,
+  usePrefab,
+  TestProps,
+  resetSharedSettings,
+} from "./index";
 
 function InnerUserComponent() {
   const { isEnabled, loading, prefab } = usePrefab();
@@ -67,6 +73,10 @@ function App({
     </PrefabTestProvider>
   );
 }
+
+beforeEach(() => {
+  resetSharedSettings();
+});
 
 it("allows nested test `PrefabTestProvider`s", async () => {
   const outerUserContext = {
