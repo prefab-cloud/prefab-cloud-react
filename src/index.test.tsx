@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { act } from "react-dom/test-utils";
 import { ContextValue } from "@prefab-cloud/prefab-cloud-js";
-import { PrefabProvider, PrefabTestProvider, usePrefab, resetSharedSettings } from "./index";
+import { PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
 
 type Config = { [key: string]: any };
 
@@ -37,8 +37,6 @@ let error: ReturnType<typeof jest.spyOn>;
 beforeEach(() => {
   error = jest.spyOn(console, "error").mockImplementation(() => {});
   warn = jest.spyOn(console, "warn").mockImplementation(() => {});
-
-  resetSharedSettings();
 });
 
 afterEach(() => {

@@ -64,12 +64,6 @@ const defaultOnError = () => {};
 const defaultCollectEvaluationSummaries = false;
 const defaultCollectLoggerNames = false;
 
-let sharedSettings: SharedSettings = {};
-
-const resetSharedSettings = () => {
-  sharedSettings = {};
-};
-
 function PrefabProvider({
   apiKey,
   contextAttributes = {},
@@ -84,7 +78,8 @@ function PrefabProvider({
   collectLoggerNames = defaultCollectLoggerNames,
   inheritSettingsFromParentProvider = true,
 }: PropsWithChildren<Props>) {
-  if (inheritSettingsFromParentProvider && Object.keys(sharedSettings).length > 0) {
+  if (inheritSettingsFromParentProvider) {
+    const { settings: sharedSettings } = usePrefab();
     /* eslint-disable no-param-reassign */
     apiKey = sharedSettings.apiKey;
     endpoints = sharedSettings.endpoints;
@@ -110,10 +105,6 @@ function PrefabProvider({
     collectEvaluationSummaries,
     collectLoggerNames,
   };
-
-  if (Object.keys(sharedSettings).length === 0) {
-    sharedSettings = settings;
-  }
 
   // We use this state to prevent a double-init when useEffect fires due to
   // StrictMode
@@ -252,6 +243,5 @@ export {
   ConfigValue,
   ContextAttributes,
   prefab,
-  resetSharedSettings,
   SharedSettings,
 };

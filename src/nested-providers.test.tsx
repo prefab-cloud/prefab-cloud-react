@@ -9,7 +9,6 @@ import {
   usePrefab,
   ContextAttributes,
   SharedSettings,
-  resetSharedSettings,
 } from "./index";
 
 enableFetchMocks();
@@ -104,10 +103,6 @@ function App({
     </PrefabProvider>
   );
 }
-
-beforeEach(() => {
-  resetSharedSettings();
-});
 
 it("allows nested `PrefabProvider`s that inherit settings", async () => {
   const outerUserContext = {
