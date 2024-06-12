@@ -49,7 +49,13 @@ function OuterUserComponent({
   innerUserContext: ContextAttributes;
   innerProviderSettings: SharedSettings;
 }) {
-  const { get, isEnabled, loading, prefab, settings } = usePrefab();
+  const { get, isEnabled, loading, prefab, settings: parentProviderSettings } = usePrefab();
+
+  let innerSettings = innerProviderSettings;
+  if (Object.keys(innerProviderSettings).length === 0) {
+    // inherit the parent settings if none are provided
+    innerSettings = parentProviderSettings;
+  }
 
   if (loading) {
     return <div>Loading outer component...</div>;
@@ -59,7 +65,7 @@ function OuterUserComponent({
     <div
       data-testid="outer-wrapper"
       data-prefab-instance-hash={prefab.instanceHash}
-      data-prefab-settings={JSON.stringify(settings)}
+      data-prefab-settings={JSON.stringify(parentProviderSettings)}
     >
       <h1 data-testid="outer-greeting">{get("greeting") ?? "Default"}</h1>
       {isEnabled("secretFeature") && (
@@ -71,7 +77,7 @@ function OuterUserComponent({
       <div>
         <h1>You are looking at {admin.name}</h1>
         {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-        <PrefabProvider {...innerProviderSettings} contextAttributes={innerUserContext}>
+        <PrefabProvider {...innerSettings} contextAttributes={innerUserContext}>
           <InnerUserComponent />
         </PrefabProvider>
       </div>
@@ -85,7 +91,7 @@ function App({
 }: {
   outerUserContext: ContextAttributes;
   innerUserContext: ContextAttributes;
-  innerProviderSettings?: SharedSettings & { inheritSettingsFromParentProvider: boolean };
+  innerProviderSettings?: SharedSettings;
 }) {
   return (
     <PrefabProvider
@@ -207,7 +213,6 @@ it("allows nested `PrefabProvider`s that DO not inherit settings", async () => {
   const innerProviderSettings = {
     apiKey: "inner-api-key",
     collectLoggerNames: true,
-    inheritSettingsFromParentProvider: false,
   };
 
   render(

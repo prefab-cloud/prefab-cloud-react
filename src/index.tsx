@@ -58,7 +58,6 @@ const assignPrefabClient = () => {
 
 type Props = SharedSettings & {
   contextAttributes?: ContextAttributes;
-  inheritSettingsFromParentProvider?: boolean;
 };
 const defaultOnError = () => {};
 const defaultCollectEvaluationSummaries = false;
@@ -76,26 +75,7 @@ function PrefabProvider({
   afterEvaluationCallback = undefined,
   collectEvaluationSummaries = defaultCollectEvaluationSummaries,
   collectLoggerNames = defaultCollectLoggerNames,
-  inheritSettingsFromParentProvider = true,
 }: PropsWithChildren<Props>) {
-  if (inheritSettingsFromParentProvider) {
-    const { settings: sharedSettings } = usePrefab();
-    if (Object.keys(sharedSettings).length > 0) {
-      /* eslint-disable no-param-reassign */
-      apiKey = sharedSettings.apiKey;
-      endpoints = sharedSettings.endpoints;
-      apiEndpoint = sharedSettings.apiEndpoint;
-      timeout = sharedSettings.timeout;
-      pollInterval = sharedSettings.pollInterval;
-      onError = sharedSettings.onError ?? defaultOnError;
-      afterEvaluationCallback = sharedSettings.afterEvaluationCallback;
-      collectEvaluationSummaries =
-        sharedSettings.collectEvaluationSummaries ?? defaultCollectEvaluationSummaries;
-      collectLoggerNames = sharedSettings.collectLoggerNames ?? defaultCollectLoggerNames;
-      /* eslint-enable no-param-reassign */
-    }
-  }
-
   const settings = {
     apiKey,
     endpoints,
