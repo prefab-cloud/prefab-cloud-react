@@ -110,7 +110,7 @@ function App({
   );
 }
 
-it("allows nested `PrefabProvider`s that inherit settings", async () => {
+it("allows nested `PrefabProvider`s that reuse the parent provider's settings", async () => {
   const outerUserContext = {
     user: { email: "dr.smith@example.com", doctor: true },
     outerOnly: { city: "NYC" },
@@ -182,7 +182,7 @@ it("allows nested `PrefabProvider`s that inherit settings", async () => {
   );
 });
 
-it("allows nested `PrefabProvider`s that DO not inherit settings", async () => {
+it("allows nested `PrefabProvider`s that use new settings", async () => {
   const outerUserContext = {
     user: { email: "dr.smith@example.com", doctor: true },
     outerOnly: { city: "NYC" },
