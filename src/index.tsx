@@ -30,7 +30,7 @@ type ProvidedContext = {
   settings: SharedSettings;
 };
 
-export const defaultContext: ProvidedContext = {
+const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
   getDuration: (_: string) => undefined,
   isEnabled: (_: string) => false,
@@ -59,22 +59,19 @@ const assignPrefabClient = () => {
 type Props = SharedSettings & {
   contextAttributes?: ContextAttributes;
 };
-const defaultOnError = () => {};
-const defaultCollectEvaluationSummaries = false;
-const defaultCollectLoggerNames = false;
 
 function PrefabProvider({
   apiKey,
   contextAttributes = {},
-  onError = defaultOnError,
+  onError = () => {},
   children,
   timeout,
   endpoints,
   apiEndpoint,
   pollInterval,
   afterEvaluationCallback = undefined,
-  collectEvaluationSummaries = defaultCollectEvaluationSummaries,
-  collectLoggerNames = defaultCollectLoggerNames,
+  collectEvaluationSummaries,
+  collectLoggerNames,
 }: PropsWithChildren<Props>) {
   const settings = {
     apiKey,
@@ -127,7 +124,7 @@ function PrefabProvider({
       const initOptions: Parameters<typeof prefabClient.init>[0] = {
         context,
         ...settings,
-        apiKey,
+        apiKey, // this is in the settings object too, but passing it separately satisfies a type issue
         clientVersionString: `prefab-cloud-react-${version}`,
       };
 
@@ -166,7 +163,7 @@ function PrefabProvider({
     loading,
     setLoading,
     onError,
-    prefabClient?.instanceHash,
+    prefabClient.instanceHash,
   ]);
 
   const value: ProvidedContext = React.useMemo(
@@ -180,7 +177,7 @@ function PrefabProvider({
       loading,
       settings,
     }),
-    [loadedContextKey, loading, prefabClient, settings]
+    [loadedContextKey, loading, prefabClient.instanceHash, settings]
   );
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;

@@ -99,7 +99,7 @@ function App({
       contextAttributes={outerUserContext}
       onError={onError}
       // eslint-disable-next-line react/jsx-boolean-value
-      collectEvaluationSummaries={true}
+      collectEvaluationSummaries={false}
     >
       <OuterUserComponent
         admin={{ name: "John Doe" }}
@@ -164,9 +164,7 @@ it("allows nested `PrefabProvider`s that reuse the parent provider's settings", 
   expect(outerPrefabWrapper.getAttribute("data-prefab-settings")).toStrictEqual(
     JSON.stringify({
       apiKey,
-      collectEvaluationSummaries: true,
-      // this isn't explicitly set above, but the default comes through
-      collectLoggerNames: false,
+      collectEvaluationSummaries: false,
       onError,
     })
   );
@@ -175,8 +173,7 @@ it("allows nested `PrefabProvider`s that reuse the parent provider's settings", 
   expect(innerPrefabWrapper.getAttribute("data-prefab-settings")).toStrictEqual(
     JSON.stringify({
       apiKey,
-      collectEvaluationSummaries: true,
-      collectLoggerNames: false,
+      collectEvaluationSummaries: false,
       onError,
     })
   );
@@ -239,20 +236,15 @@ it("allows nested `PrefabProvider`s that use new settings", async () => {
   expect(outerPrefabWrapper.getAttribute("data-prefab-settings")).toStrictEqual(
     JSON.stringify({
       apiKey,
-      collectEvaluationSummaries: true,
-      // this isn't explicitly set above, but the default comes through
-      collectLoggerNames: false,
+      collectEvaluationSummaries: false,
       onError,
     })
   );
 
-  // These are NOT inherited so we get what we set on the inner provider (or defaults)
+  // These are NOT inherited so we get what we set on the inner provider
   expect(innerPrefabWrapper.getAttribute("data-prefab-settings")).toStrictEqual(
     JSON.stringify({
       apiKey: "inner-api-key",
-      // default, which differes from the explicit value passed into parent above
-      collectEvaluationSummaries: false,
-      // explicit value passed to inner
       collectLoggerNames: true,
     })
   );
