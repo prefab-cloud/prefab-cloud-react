@@ -1,5 +1,9 @@
 Changelog
 
+## 0.3.1 - 2024-06-13
+
+- Support for nested PrefabProviders
+
 ## 0.3.0 - 2024-06-04
 
 - collectEvaluationSummaries is now opt-out (#42)
