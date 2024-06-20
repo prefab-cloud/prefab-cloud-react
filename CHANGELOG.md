@@ -1,5 +1,9 @@
 Changelog
 
+## 0.3.2 - 2024-06-20
+
+- Allow nesting a PrefabProvider in a PrefabTestProvider (#48)
+
 ## 0.3.1 - 2024-06-13
 
 - Support for nested PrefabProviders
