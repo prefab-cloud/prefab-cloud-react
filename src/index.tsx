@@ -185,9 +185,10 @@ function PrefabProvider({
 
 type TestProps = {
   config: Record<string, any>;
+  apiKey?: string;
 };
 
-function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) {
+function PrefabTestProvider({ apiKey, config, children }: PropsWithChildren<TestProps>) {
   const get = (key: string) => config[key];
   const getDuration = (key: string) => config[key];
   const isEnabled = (key: string) => !!get(key);
@@ -206,7 +207,7 @@ function PrefabTestProvider({ config, children }: PropsWithChildren<TestProps>) 
       loading: false,
       prefab: prefabClient,
       keys: Object.keys(config),
-      settings: {},
+      settings: { apiKey: apiKey ?? "fake-api-key-via-the-test-provider" },
     };
   }, [config]);
 
