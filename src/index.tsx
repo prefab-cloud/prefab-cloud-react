@@ -1,5 +1,12 @@
 import React, { PropsWithChildren } from "react";
-import { prefab, ConfigValue, Context, Duration, Prefab } from "@prefab-cloud/prefab-cloud-js";
+import {
+  prefab,
+  CollectContextModeType,
+  ConfigValue,
+  Context,
+  Duration,
+  Prefab,
+} from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
 
 type ContextValue = number | string | boolean;
@@ -17,6 +24,7 @@ type SharedSettings = {
   afterEvaluationCallback?: EvaluationCallback;
   collectEvaluationSummaries?: boolean;
   collectLoggerNames?: boolean;
+  collectContextMode?: CollectContextModeType;
 };
 
 type ProvidedContext = {
@@ -72,6 +80,7 @@ function PrefabProvider({
   afterEvaluationCallback = undefined,
   collectEvaluationSummaries,
   collectLoggerNames,
+  collectContextMode,
 }: PropsWithChildren<Props>) {
   const settings = {
     apiKey,
@@ -83,6 +92,7 @@ function PrefabProvider({
     afterEvaluationCallback,
     collectEvaluationSummaries,
     collectLoggerNames,
+    collectContextMode,
   };
 
   // We use this state to prevent a double-init when useEffect fires due to
