@@ -17,7 +17,7 @@
   "author": "Jeffrey Chupp",
   "license": "ISC",
   "dependencies": {
-    "@prefab-cloud/prefab-cloud-js": "0.3.0"
+    "@prefab-cloud/prefab-cloud-js": "0.3.1"
   },
   "keywords": [
     "feature-flags",
