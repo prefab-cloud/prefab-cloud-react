@@ -1,5 +1,11 @@
 Changelog
 
+## 0.3.3 - 2024-7-10
+
+- Adds collectContextMode option to control context telemetry
+- Tries to flush telemetry when browser window closes
+- Improves prefix for internal logger names
+
 ## 0.3.2 - 2024-06-20
 
 - Allow nesting a PrefabProvider in a PrefabTestProvider (#48)
