@@ -135,7 +135,8 @@ function PrefabProvider({
         context,
         ...settings,
         apiKey, // this is in the settings object too, but passing it separately satisfies a type issue
-        clientVersionString: `prefab-cloud-react-${version}`,
+        clientNameString: "prefab-cloud-react",
+        clientVersionString: version,
       };
 
       prefabClient
