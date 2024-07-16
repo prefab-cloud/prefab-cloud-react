@@ -1,5 +1,9 @@
 Changelog
 
+## 0.3.4 - 2024-07-16
+
+- Adds validation console errors for Context object
+
 ## 0.3.3 - 2024-7-10
 
 - Adds collectContextMode option to control context telemetry
