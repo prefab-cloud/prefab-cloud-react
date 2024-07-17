@@ -1,5 +1,9 @@
 Changelog
 
+## 0.3.5 - 2024-07-17
+
+- Reduces volume of internal logging done by telemetry uploader
+
 ## 0.3.4 - 2024-07-16
 
 - Adds validation console errors for Context object
