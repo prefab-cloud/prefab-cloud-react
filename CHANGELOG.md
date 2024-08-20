@@ -1,5 +1,9 @@
 Changelog
 
+## 0.3.7 - 2024-08-20
+
+- More robust error handling (#56)
+
 ## 0.3.6 - 2024-07-18
 
 - Fixes error when uploading eval telemetry for stringList values
