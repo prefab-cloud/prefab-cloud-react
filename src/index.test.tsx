@@ -49,11 +49,13 @@ describe("Provider", () => {
 
   const renderInProvider = ({
     contextAttributes,
+    onError,
   }: {
     contextAttributes?: { [key: string]: Record<string, ContextValue> };
+    onError?: (err: Error) => void;
   }) =>
     render(
-      <PrefabProvider apiKey="api-key" contextAttributes={contextAttributes} onError={() => {}}>
+      <PrefabProvider apiKey="api-key" contextAttributes={contextAttributes} onError={onError}>
         <MyComponent />
       </PrefabProvider>
     );
@@ -75,6 +77,9 @@ describe("Provider", () => {
     config: Config,
     providerConfig: Parameters<typeof renderInProvider>[0] = {
       contextAttributes: defaultContextAttributes,
+      onError: (e) => {
+        throw e;
+      },
     }
   ) => {
     const promise = stubConfig(config);
@@ -214,6 +219,29 @@ describe("Provider", () => {
     expect(callback).toHaveBeenCalledWith("greeting", "afterEvaluationCallback", {
       contexts: context,
     });
+  });
+
+  it("triggers onError if something goes wrong", async () => {
+    const context = { user: { name: "🥰", phone: "(555) 555–5555" } };
+    const onError = jest.fn();
+
+    await renderWithConfig({}, { contextAttributes: context, onError });
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        // NOTE: While context-encoding bug is fixed in the in-browser version
+        // of prefab-cloud-js since
+        // https://github.com/prefab-cloud/prefab-cloud-js/pull/65 the Node
+        // version (which is only intended to be run in unit-tests) still
+        // exhibits the bug. It is convenient for us to test this onError.
+        name: "InvalidCharacterError",
+        message: "The string to be encoded contains invalid characters.",
+      })
+    );
+
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("Default");
+    const secretFeature = screen.queryByTitle("secret-feature");
+    expect(secretFeature).not.toBeInTheDocument();
   });
 });
 
