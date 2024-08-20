@@ -68,10 +68,35 @@ type Props = SharedSettings & {
   contextAttributes?: ContextAttributes;
 };
 
+const getContext = (
+  contextAttributes: ContextAttributes,
+  onError: (e: Error) => void
+): [Context, string] => {
+  try {
+    if (Object.keys(contextAttributes).length === 0) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "PrefabProvider: You haven't passed any contextAttributes. See https://docs.prefab.cloud/docs/sdks/react#using-context"
+      );
+    }
+
+    const context = new Context(contextAttributes);
+    const contextKey = context.encode();
+
+    return [context, contextKey];
+  } catch (e) {
+    onError(e as Error);
+    return [new Context({}), ""];
+  }
+};
+
 function PrefabProvider({
   apiKey,
   contextAttributes = {},
-  onError = () => {},
+  onError = (e: unknown) => {
+    // eslint-disable-next-line no-console
+    console.error(e);
+  },
   children,
   timeout,
   endpoints,
@@ -107,15 +132,7 @@ function PrefabProvider({
 
   const prefabClient: Prefab = React.useMemo(() => assignPrefabClient(), []);
 
-  if (Object.keys(contextAttributes).length === 0) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "PrefabProvider: You haven't passed any contextAttributes. See https://docs.prefab.cloud/docs/sdks/react#using-context"
-    );
-  }
-
-  const context = new Context(contextAttributes);
-  const contextKey = context.encode();
+  const [context, contextKey] = getContext(contextAttributes, onError);
 
   React.useEffect(() => {
     if (mostRecentlyLoadingContextKey.current === contextKey) {
@@ -123,49 +140,53 @@ function PrefabProvider({
     }
 
     setLoading(true);
+    try {
+      if (mostRecentlyLoadingContextKey.current === undefined) {
+        mostRecentlyLoadingContextKey.current = contextKey;
 
-    if (mostRecentlyLoadingContextKey.current === undefined) {
-      mostRecentlyLoadingContextKey.current = contextKey;
+        if (!apiKey) {
+          throw new Error("PrefabProvider: apiKey is required");
+        }
 
-      if (!apiKey) {
-        throw new Error("PrefabProvider: apiKey is required");
+        const initOptions: Parameters<typeof prefabClient.init>[0] = {
+          context,
+          ...settings,
+          apiKey, // this is in the settings object too, but passing it separately satisfies a type issue
+          clientNameString: "prefab-cloud-react",
+          clientVersionString: version,
+        };
+
+        prefabClient
+          .init(initOptions)
+          .then(() => {
+            setLoadedContextKey(contextKey);
+            setLoading(false);
+
+            if (pollInterval) {
+              prefabClient.poll({ frequencyInMs: pollInterval });
+            }
+          })
+          .catch((reason: any) => {
+            setLoading(false);
+            onError(reason);
+          });
+      } else {
+        mostRecentlyLoadingContextKey.current = contextKey;
+
+        prefabClient
+          .updateContext(context)
+          .then(() => {
+            setLoadedContextKey(contextKey);
+            setLoading(false);
+          })
+          .catch((reason: any) => {
+            setLoading(false);
+            onError(reason);
+          });
       }
-
-      const initOptions: Parameters<typeof prefabClient.init>[0] = {
-        context,
-        ...settings,
-        apiKey, // this is in the settings object too, but passing it separately satisfies a type issue
-        clientNameString: "prefab-cloud-react",
-        clientVersionString: version,
-      };
-
-      prefabClient
-        .init(initOptions)
-        .then(() => {
-          setLoadedContextKey(contextKey);
-          setLoading(false);
-
-          if (pollInterval) {
-            prefabClient.poll({ frequencyInMs: pollInterval });
-          }
-        })
-        .catch((reason: any) => {
-          setLoading(false);
-          onError(reason);
-        });
-    } else {
-      mostRecentlyLoadingContextKey.current = contextKey;
-
-      prefabClient
-        .updateContext(context)
-        .then(() => {
-          setLoadedContextKey(contextKey);
-          setLoading(false);
-        })
-        .catch((reason: any) => {
-          setLoading(false);
-          onError(reason);
-        });
+    } catch (e) {
+      setLoading(false);
+      onError(e as Error);
     }
   }, [
     apiKey,
