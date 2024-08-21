@@ -20,7 +20,7 @@ const stubConfig = (config: Config) =>
         ok: true,
         json: () => {
           setTimeout(resolve);
-          return { values: config };
+          return { evaluations: config };
         },
       })
     ) as jest.Mock;
@@ -159,7 +159,6 @@ it("can nest a real provider within a test provider", async () => {
     user: { email: "dr.smith@example.com", doctor: true },
     outerOnly: { city: "NYC" },
   };
-  const innerUserContext = { user: { email: "patient@example.com", doctor: false } };
 
   const outerTestConfig = {
     contextAttributes: outerUserContext,
@@ -168,9 +167,8 @@ it("can nest a real provider within a test provider", async () => {
   };
 
   const innerTestConfig = {
-    contextAttributes: innerUserContext,
-    greeting: "Hi",
-    secretFeature: false,
+    greeting: { value: { string: "Hi" } },
+    secretFeature: { value: { bool: false } },
   };
 
   const promise = stubConfig(innerTestConfig);

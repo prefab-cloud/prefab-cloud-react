@@ -118,10 +118,16 @@ it("allows nested `PrefabProvider`s that reuse the parent provider's settings", 
   const innerUserContext = { user: { email: "patient@example.com", doctor: false } };
 
   const outerUserFetchData = {
-    values: { greeting: { string: "Greetings, Doctor" }, secretFeature: { bool: true } },
+    evaluations: {
+      greeting: { value: { string: "Greetings, Doctor" } },
+      secretFeature: { value: { bool: true } },
+    },
   };
   const innerUserFetchData = {
-    values: { greeting: { string: "Hi" }, secretFeature: { bool: false } },
+    evaluations: {
+      greeting: { value: { string: "Hi" } },
+      secretFeature: { value: { bool: false } },
+    },
   };
 
   fetchMock.mockResponse((req) => {
@@ -187,10 +193,16 @@ it("allows nested `PrefabProvider`s that use new settings", async () => {
   const innerUserContext = { user: { email: "patient@example.com", doctor: false } };
 
   const outerUserFetchData = {
-    values: { greeting: { string: "Greetings, Doctor" }, secretFeature: { bool: true } },
+    evaluations: {
+      greeting: { value: { string: "Greetings, Doctor" } },
+      secretFeature: { value: { bool: true } },
+    },
   };
   const innerUserFetchData = {
-    values: { greeting: { string: "Hi" }, secretFeature: { bool: false } },
+    evaluations: {
+      greeting: { value: { string: "Hi" } },
+      secretFeature: { value: { bool: false } },
+    },
   };
 
   fetchMock.mockResponse((req) => {

@@ -67,7 +67,7 @@ describe("Provider", () => {
           ok: true,
           json: () => {
             setTimeout(resolve);
-            return { values: config };
+            return { evaluations: config };
           },
         })
       ) as jest.Mock;
@@ -106,7 +106,7 @@ describe("Provider", () => {
   });
 
   it("allows providing flag values", async () => {
-    await renderWithConfig({ greeting: { string: "CUSTOM" } });
+    await renderWithConfig({ greeting: { value: { string: "CUSTOM" } } });
 
     const alert = screen.queryByRole("alert");
     expect(alert).toHaveTextContent("CUSTOM");
@@ -116,8 +116,8 @@ describe("Provider", () => {
 
   it("allows providing true flag booleans", async () => {
     await renderWithConfig({
-      greeting: { string: "CUSTOM" },
-      secretFeature: { boolean: true },
+      greeting: { value: { string: "CUSTOM" } },
+      secretFeature: { value: { boolean: true } },
     });
 
     const alert = screen.queryByRole("alert");
@@ -128,8 +128,8 @@ describe("Provider", () => {
 
   it("allows providing false flag booleans", async () => {
     await renderWithConfig({
-      greeting: { string: "CUSTOM" },
-      secretFeature: { boolean: false },
+      greeting: { value: { string: "CUSTOM" } },
+      secretFeature: { value: { boolean: false } },
     });
 
     const alert = screen.queryByRole("alert");
@@ -140,7 +140,7 @@ describe("Provider", () => {
 
   it("allows providing json configs", async () => {
     await renderWithConfig({
-      subtitle: { json: { json: '{ "actualSubtitle": "Json Subtitle" }' } },
+      subtitle: { value: { json: '{ "actualSubtitle": "Json Subtitle" }' } },
     });
 
     const alert = screen.queryByRole("banner");
@@ -150,8 +150,8 @@ describe("Provider", () => {
   it("warns when you do not provide contextAttributes", async () => {
     const rendered = await renderWithConfig(
       {
-        greeting: { string: "CUSTOM" },
-        secretFeature: { boolean: true },
+        greeting: { value: { string: "CUSTOM" } },
+        secretFeature: { value: { boolean: true } },
       },
       { contextAttributes: { user: { email: "old@example.com" } } }
     );
@@ -160,8 +160,8 @@ describe("Provider", () => {
     expect(alert).toHaveTextContent("CUSTOM");
 
     const newConfigPromise = stubConfig({
-      greeting: { string: "ANOTHER" },
-      secretFeature: { boolean: false },
+      greeting: { value: { string: "ANOTHER" } },
+      secretFeature: { value: { boolean: false } },
     });
 
     act(() => {
@@ -195,7 +195,7 @@ describe("Provider", () => {
 
     const callback = jest.fn();
 
-    const promise = stubConfig({ greeting: { string: "afterEvaluationCallback" } });
+    const promise = stubConfig({ greeting: { value: { string: "afterEvaluationCallback" } } });
 
     render(
       <PrefabProvider

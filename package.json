@@ -1,6 +1,6 @@
 {
   "name": "@prefab-cloud/prefab-cloud-react",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "FeatureFlags & Dynamic Configuration as a Service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,7 @@
   "author": "Jeffrey Chupp",
   "license": "ISC",
   "dependencies": {
-    "@prefab-cloud/prefab-cloud-js": "^0.3.5"
+    "@prefab-cloud/prefab-cloud-js": "^0.4.0"
   },
   "keywords": [
     "feature-flags",
