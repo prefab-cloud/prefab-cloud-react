@@ -1,5 +1,9 @@
 Changelog
 
+## 0.4.0 - 2024-08-21
+
+- Update Prefab JS client to 0.4.0 / global delivery
+
 ## 0.3.7 - 2024-08-20
 
 - More robust error handling (#56)
