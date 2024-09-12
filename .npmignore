@@ -1,5 +1,15 @@
 coverage
 build.sh
-dist/src/*.test.js
+dist/src/*\.test\.*
+dist/*\.test\.*
+src/*\.test\.*
 .github/
+dist/jest\.*
+jest.config.ts
+types/jest.*
 *.tgz
+.tool-versions
+.eslintrc.js
+.prettierignore
+.prettierrc
+CODEOWNERS

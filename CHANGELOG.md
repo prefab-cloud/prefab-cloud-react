@@ -1,5 +1,9 @@
 Changelog
 
+## 0.4.1 - 2024-09-12
+
+- Update Prefab JS client to 0.4.2 (for bootstrapping)
+
 ## 0.4.0 - 2024-08-21
 
 - Update Prefab JS client to 0.4.0 / global delivery
