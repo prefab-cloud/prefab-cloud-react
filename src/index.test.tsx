@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { act } from "react-dom/test-utils";
 import { ContextValue } from "@prefab-cloud/prefab-cloud-js";
-import { PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
+import { ContextAttributes, PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
 
 type Config = { [key: string]: any };
 
@@ -186,8 +186,48 @@ describe("Provider", () => {
     expect(alert).toHaveTextContent("ANOTHER");
   });
 
-  it("re-fetches when you update the contextAttributes", async () => {
-    await renderWithConfig({}, { contextAttributes: defaultContextAttributes });
+  it("re-fetches when you update the contextAttributes prop on the provider", async () => {
+    let setContextAttributes: (attributes: ContextAttributes) => void = () => {
+      // eslint-disable-next-line no-console
+      console.warn("setContextAttributes not set");
+    };
+
+    const promise = stubConfig({ greeting: { value: { string: "CUSTOM" } } });
+
+    function Wrapper({ context }: { context: ContextAttributes }) {
+      const [contextAttributes, innerSetContextAttributes] = React.useState(context);
+
+      setContextAttributes = innerSetContextAttributes;
+
+      return (
+        <PrefabProvider apiKey="api-key" contextAttributes={contextAttributes} onError={() => {}}>
+          <MyComponent />
+        </PrefabProvider>
+      );
+    }
+
+    render(<Wrapper context={{ user: { email: "test@example.com" } }} />);
+
+    await act(async () => {
+      await promise;
+    });
+
+    const alert = screen.queryByRole("alert");
+    expect(alert).toHaveTextContent("CUSTOM");
+
+    const newRequestPromise = stubConfig({
+      greeting: { value: { string: "UPDATED FROM CONTEXT" } },
+    });
+
+    setContextAttributes({ user: { email: "foo@example.com" } });
+
+    await newRequestPromise;
+    // wait for render
+    // eslint-disable-next-line no-promise-executor-return
+    await new Promise((r) => setTimeout(r, 1));
+
+    const updatedAlert = screen.queryByRole("alert");
+    expect(updatedAlert).toHaveTextContent("UPDATED FROM CONTEXT");
   });
 
   it("allows providing an afterEvaluationCallback", async () => {
