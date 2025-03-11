@@ -1,5 +1,9 @@
 Changelog
 
+## 0.4.2 - 2025-03-11
+
+- Add ESM support (#59)
+
 ## 0.4.1 - 2024-09-12
 
 - Update Prefab JS client to 0.4.2 (for bootstrapping)
