@@ -14,6 +14,12 @@ type ContextAttributes = { [key: string]: Record<string, ContextValue> };
 
 type EvaluationCallback = (key: string, value: ConfigValue, context: Context | undefined) => void;
 
+type ClassMethods<T> = {
+  [K in keyof T]: T[K];
+};
+
+type PrefabTypesafeClass<T> = new (prefabInstance: Prefab) => T;
+
 type SharedSettings = {
   apiKey?: string;
   endpoints?: string[];
@@ -27,7 +33,7 @@ type SharedSettings = {
   collectContextMode?: CollectContextModeType;
 };
 
-export type ProvidedContext = {
+export type ProvidedContext<T = Record<string, unknown>> = {
   get: (key: string) => any;
   getDuration(key: string): Duration | undefined;
   contextAttributes: ContextAttributes;
@@ -36,7 +42,7 @@ export type ProvidedContext = {
   prefab: typeof prefab;
   keys: string[];
   settings: SharedSettings;
-};
+} & ClassMethods<T>; // from PrefabTypesafe
 
 export const defaultContext: ProvidedContext = {
   get: (_: string) => undefined,
@@ -49,9 +55,24 @@ export const defaultContext: ProvidedContext = {
   settings: {},
 };
 
-export const PrefabContext = React.createContext(defaultContext);
+export const PrefabContext = React.createContext<ProvidedContext>(defaultContext);
 
-export const usePrefab = () => React.useContext(PrefabContext);
+// This is a factory function that creates a fully typed usePrefab hook for a specific PrefabTypesafe class
+export const createPrefabHook =
+  <T,>(_typesafeClass: PrefabTypesafeClass<T>) =>
+  (): ProvidedContext<T> =>
+    React.useContext(PrefabContext) as ProvidedContext<T>;
+
+// Basic hook for general use - requires type parameter
+export const useBasePrefab = () => React.useContext(PrefabContext);
+
+// Helper hook for explicit typing
+export const usePrefabTypesafe = <T,>(): ProvidedContext<T> =>
+  useBasePrefab() as unknown as ProvidedContext<T>;
+
+// General hook that returns the context with any explicit type
+export const usePrefab = <T = any,>(): ProvidedContext<T> =>
+  useBasePrefab() as unknown as ProvidedContext<T>;
 
 let globalPrefabIsTaken = false;
 
@@ -64,8 +85,9 @@ export const assignPrefabClient = () => {
   return prefab;
 };
 
-export type Props = SharedSettings & {
+export type Props<T = Record<string, unknown>> = SharedSettings & {
   contextAttributes?: ContextAttributes;
+  PrefabTypesafeClass?: PrefabTypesafeClass<T>;
 };
 
 const getContext = (
@@ -90,7 +112,32 @@ const getContext = (
   }
 };
 
-function PrefabProvider({
+// Helper to extract methods from a TypesafeClass instance
+export const extractTypesafeMethods = (instance: any): Record<string, any> => {
+  const methods: Record<string, any> = {};
+  const prototype = Object.getPrototypeOf(instance);
+
+  const descriptors = Object.getOwnPropertyDescriptors(prototype);
+
+  Object.keys(descriptors).forEach((key) => {
+    if (key === "constructor") return;
+
+    const descriptor = descriptors[key];
+
+    // Handle regular methods
+    if (typeof instance[key] === "function") {
+      methods[key] = instance[key].bind(instance);
+    }
+    // Handle getters - convert to regular properties
+    else if (descriptor.get) {
+      methods[key] = instance[key];
+    }
+  });
+
+  return methods;
+};
+
+function PrefabProvider<T = any>({
   apiKey,
   contextAttributes = {},
   onError = (e: unknown) => {
@@ -106,7 +153,8 @@ function PrefabProvider({
   collectEvaluationSummaries,
   collectLoggerNames,
   collectContextMode,
-}: PropsWithChildren<Props>) {
+  PrefabTypesafeClass: TypesafeClass,
+}: PropsWithChildren<Props<T>>) {
   const settings = {
     apiKey,
     endpoints,
@@ -198,8 +246,16 @@ function PrefabProvider({
     prefabClient.instanceHash,
   ]);
 
-  const value: ProvidedContext = React.useMemo(
-    () => ({
+  // Memoize typesafe instance separately
+  const typesafeInstance = React.useMemo(() => {
+    if (TypesafeClass && prefabClient) {
+      return new TypesafeClass(prefabClient);
+    }
+    return null;
+  }, [TypesafeClass, prefabClient.instanceHash, loading]);
+
+  const value = React.useMemo(() => {
+    const baseContext: ProvidedContext = {
       isEnabled: prefabClient.isEnabled.bind(prefabClient),
       contextAttributes,
       get: prefabClient.get.bind(prefabClient),
@@ -208,11 +264,17 @@ function PrefabProvider({
       prefab: prefabClient,
       loading,
       settings,
-    }),
-    [loadedContextKey, loading, prefabClient.instanceHash, settings]
-  );
+    };
+
+    if (typesafeInstance) {
+      const methods = extractTypesafeMethods(typesafeInstance);
+      return { ...baseContext, ...methods };
+    }
+
+    return baseContext;
+  }, [loadedContextKey, loading, prefabClient.instanceHash, settings, typesafeInstance]);
 
   return <PrefabContext.Provider value={value}>{children}</PrefabContext.Provider>;
 }
 
-export { PrefabProvider, ConfigValue, ContextAttributes, SharedSettings };
+export { PrefabProvider, ConfigValue, ContextAttributes, SharedSettings, PrefabTypesafeClass };
