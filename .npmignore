@@ -2,10 +2,13 @@ coverage
 build.sh
 dist/src/*\.test\.*
 dist/*\.test\.*
+dist/esm/*\.test\.*
 src/*\.test\.*
 .github/
 dist/jest\.*
-jest.config.ts
+dist/esm/jest\.*
+jest.config.js
+src/jest.setup.ts
 types/jest.*
 *.tgz
 .tool-versions
