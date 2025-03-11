@@ -2,6 +2,13 @@
 src/
 tests/
 
+# Test files and helpers
+**/__tests__/
+**/*.test.*
+**/*.spec.*
+**/test-*.*
+**/test/
+
 # Development/build files
 scripts/
 tsconfig.json

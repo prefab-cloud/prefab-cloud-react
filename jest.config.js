@@ -12,8 +12,8 @@ module.exports = {
       },
     ],
   },
-  setupFilesAfterEnv: ["<rootDir>/src/jest.setup.ts"],
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
+  setupFilesAfterEnv: ["<rootDir>/src/__tests__/jest.setup.ts"],
+  testRegex: "(/__tests__/.*\\.)(test|spec)\\.[jt]sx?$",
   moduleNameMapper: {
     // Handle module aliases and resolve paths
     "^(\\.{1,2}/.*)\\.js$": "$1",
