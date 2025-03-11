@@ -3,11 +3,11 @@ import "@testing-library/jest-dom/extend-expect";
 import { act, render, screen } from "@testing-library/react";
 import {
   prefab as globalPrefab,
-  PrefabTestProvider,
-  usePrefab,
-  TestProps,
   PrefabProvider,
-} from "./index";
+  usePrefab,
+  PrefabTestProvider,
+  TestProps,
+} from "../index";
 
 type Provider = typeof PrefabTestProvider | typeof PrefabProvider;
 
