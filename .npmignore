@@ -1,18 +1,39 @@
-coverage
-build.sh
-dist/src/*\.test\.*
-dist/*\.test\.*
-dist/esm/*\.test\.*
-src/*\.test\.*
-.github/
-dist/jest\.*
-dist/esm/jest\.*
+# Source code
+src/
+tests/
+
+# Development/build files
+scripts/
+tsconfig.json
+tsup.config.ts
 jest.config.js
-src/jest.setup.ts
-types/jest.*
-*.tgz
-.tool-versions
 .eslintrc.js
-.prettierignore
 .prettierrc
+.prettierignore
+.github/
+.vscode/
+.tool-versions
 CODEOWNERS
+CONTRIBUTING.md
+
+# CI/Release related
+publish-*.sh
+.travis.yml
+.gitlab-ci.yml
+.github/
+.circleci/
+
+# Misc
+node_modules/
+coverage/
+.DS_Store
+.env
+.env.*
+*.log
+.git/
+.gitignore
+
+# Keep README, LICENSE, and CHANGELOG
+!README.md
+!LICENSE
+!CHANGELOG.md

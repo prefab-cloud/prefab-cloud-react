@@ -1,5 +1,9 @@
 Changelog
 
+## 0.4.4 - 2025-03-12
+
+- Use tsup for better ESM/CJS compatibility
+
 ## 0.4.2 - 2025-03-11
 
 - Add ESM support (#59)
