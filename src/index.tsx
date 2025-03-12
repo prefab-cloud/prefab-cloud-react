@@ -1,10 +1,10 @@
 import React, { PropsWithChildren } from "react";
 import {
   prefab,
-  CollectContextModeType,
-  ConfigValue,
+  type CollectContextModeType,
+  type ConfigValue,
   Context,
-  Duration,
+  type Duration,
   Prefab,
 } from "@prefab-cloud/prefab-cloud-js";
 import version from "./version";
