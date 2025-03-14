@@ -1,7 +1,9 @@
+/* eslint-disable max-classes-per-file */
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
-import { PrefabTestProvider, usePrefab } from "../index";
+import { Prefab } from "@prefab-cloud/prefab-cloud-js";
+import { PrefabTestProvider, usePrefab, createPrefabHook } from "../index";
 import { AppConfig, TypesafeComponent, HookComponent, typesafeTestConfig } from "./test-helpers";
 
 function MyComponent() {
@@ -117,5 +119,145 @@ describe("PrefabTestProvider with TypesafeClass", () => {
     expect(screen.getByTestId("raw-theme-color")).toHaveTextContent("#000000");
     expect(screen.queryByTestId("feature-flag")).not.toBeInTheDocument();
     expect(screen.getByTestId("timeout")).toHaveTextContent("2000"); // 1000 (default) * 2
+  });
+});
+
+// Adding explicit tests for createPrefabHook functionality
+describe("createPrefabHook functionality with PrefabTestProvider", () => {
+  // Custom TypesafeClass for testing
+  class CustomFeatureFlags {
+    private prefab: Prefab;
+
+    constructor(prefab: Prefab) {
+      this.prefab = prefab;
+    }
+
+    isCustomFeatureEnabled(): boolean {
+      return this.prefab.isEnabled("custom.feature");
+    }
+
+    getCustomMessage(): string {
+      const message = this.prefab.get("custom.message");
+      return typeof message === "string" ? message : "Default Message";
+    }
+
+    calculateCustomValue(multiplier: number): number {
+      const baseValue = this.prefab.get("custom.base.value");
+      const base = typeof baseValue === "number" ? baseValue : 5;
+      return base * multiplier;
+    }
+  }
+
+  // Create a typed hook using our TypesafeClass
+  const useCustomFeatureFlags = createPrefabHook(CustomFeatureFlags);
+
+  // Component that uses the custom typed hook
+  function CustomHookComponent() {
+    const { isCustomFeatureEnabled, getCustomMessage, calculateCustomValue } =
+      useCustomFeatureFlags();
+
+    return (
+      <div>
+        <h1 data-testid="custom-message">{getCustomMessage()}</h1>
+        {isCustomFeatureEnabled() && <div data-testid="custom-feature">Custom Feature Enabled</div>}
+        <div data-testid="custom-calculated-value">{calculateCustomValue(3)}</div>
+      </div>
+    );
+  }
+
+  it("creates a working custom hook with createPrefabHook", () => {
+    render(
+      <PrefabTestProvider
+        config={{
+          "custom.message": "Hello from Test Custom Hook",
+          "custom.feature": true,
+          "custom.base.value": 10,
+        }}
+        PrefabTypesafeClass={CustomFeatureFlags}
+      >
+        <CustomHookComponent />
+      </PrefabTestProvider>
+    );
+
+    expect(screen.getByTestId("custom-message")).toHaveTextContent("Hello from Test Custom Hook");
+    expect(screen.getByTestId("custom-feature")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-calculated-value")).toHaveTextContent("30"); // 10 * 3
+  });
+
+  it("provides default values when configs are not provided", () => {
+    render(
+      <PrefabTestProvider
+        config={{
+          // Only specify some values
+          "custom.message": "Only Message Set",
+        }}
+        PrefabTypesafeClass={CustomFeatureFlags}
+      >
+        <CustomHookComponent />
+      </PrefabTestProvider>
+    );
+
+    expect(screen.getByTestId("custom-message")).toHaveTextContent("Only Message Set");
+    expect(screen.queryByTestId("custom-feature")).not.toBeInTheDocument();
+    expect(screen.getByTestId("custom-calculated-value")).toHaveTextContent("15"); // 5 (default) * 3
+  });
+
+  it("memoizes TypesafeClass instance when used with custom hook", async () => {
+    // Create a class with spies
+    const constructorSpy = jest.fn();
+    const methodSpy = jest.fn().mockReturnValue("memoized result");
+
+    class SpiedClass {
+      private prefab: Prefab;
+
+      constructor(prefab: Prefab) {
+        constructorSpy(prefab);
+        this.prefab = prefab;
+      }
+
+      // eslint-disable-next-line class-methods-use-this
+      testMethod(): string {
+        return methodSpy();
+      }
+    }
+
+    const useSpiedHook = createPrefabHook(SpiedClass);
+
+    // Component that forces re-renders
+    function ReRenderingComponent() {
+      const [counter, setCounter] = React.useState(0);
+      const { testMethod } = useSpiedHook();
+
+      // Call the method on each render
+      const result = testMethod();
+
+      React.useEffect(() => {
+        // Force multiple re-renders
+        if (counter < 3) {
+          setTimeout(() => setCounter(counter + 1), 10);
+        }
+      }, [counter]);
+
+      return (
+        <div data-testid="test-result">
+          {result} (Count: {counter})
+        </div>
+      );
+    }
+
+    render(
+      <PrefabTestProvider config={{}} PrefabTypesafeClass={SpiedClass}>
+        <ReRenderingComponent />
+      </PrefabTestProvider>
+    );
+
+    // Wait for all re-renders to complete
+    await waitFor(() => {
+      expect(screen.getByTestId("test-result")).toHaveTextContent("(Count: 3)");
+    });
+
+    // Constructor should be called only once, method called for each render
+    expect(constructorSpy).toHaveBeenCalledTimes(1);
+    expect(methodSpy).toHaveBeenCalledTimes(4); // Initial render + 3 updates
   });
 });
