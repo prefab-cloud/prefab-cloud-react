@@ -15,5 +15,5 @@ jobs:
         run: npm run test
       - name: Run lints
         run: npm run lint
-      - name: Run Prettier
-        run: npm run prettier
+      - name: Run formatter
+        run: npm run format
