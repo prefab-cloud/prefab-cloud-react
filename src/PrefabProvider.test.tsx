@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { act } from "react-dom/test-utils";
 import { ContextValue } from "@prefab-cloud/prefab-cloud-js";
-import { ContextAttributes, PrefabProvider, PrefabTestProvider, usePrefab } from "./index";
+import { ContextAttributes, PrefabProvider, usePrefab } from "./PrefabProvider";
 
 type Config = { [key: string]: any };
 
@@ -44,7 +44,7 @@ afterEach(() => {
   error.mockReset();
 });
 
-describe("Provider", () => {
+describe("PrefabProvider", () => {
   const defaultContextAttributes = { user: { email: "test@example.com" } };
 
   const renderInProvider = ({
@@ -282,58 +282,5 @@ describe("Provider", () => {
     expect(alert).toHaveTextContent("Default");
     const secretFeature = screen.queryByTitle("secret-feature");
     expect(secretFeature).not.toBeInTheDocument();
-  });
-});
-
-describe("TestProvider", () => {
-  const renderInTestProvider = (config: Config) => {
-    render(
-      <PrefabTestProvider config={config}>
-        <MyComponent />
-      </PrefabTestProvider>
-    );
-  };
-
-  it("renders without config", () => {
-    renderInTestProvider({});
-
-    const alert = screen.queryByRole("alert");
-    expect(alert).toHaveTextContent("Default");
-    const secretFeature = screen.queryByTitle("secret-feature");
-    expect(secretFeature).not.toBeInTheDocument();
-  });
-
-  it("allows providing flag values", async () => {
-    renderInTestProvider({ greeting: "CUSTOM" });
-
-    const alert = screen.queryByRole("alert");
-    expect(alert).toHaveTextContent("CUSTOM");
-    const secretFeature = screen.queryByTitle("secret-feature");
-    expect(secretFeature).not.toBeInTheDocument();
-  });
-
-  it("allows providing true flag booleans", async () => {
-    renderInTestProvider({ greeting: "CUSTOM", secretFeature: true });
-
-    const alert = screen.queryByRole("alert");
-    expect(alert).toHaveTextContent("CUSTOM");
-    const secretFeature = screen.queryByTitle("secret-feature");
-    expect(secretFeature).toBeInTheDocument();
-  });
-
-  it("allows providing false flag booleans", async () => {
-    renderInTestProvider({ greeting: "CUSTOM", secretFeature: false });
-
-    const alert = screen.queryByRole("alert");
-    expect(alert).toHaveTextContent("CUSTOM");
-    const secretFeature = screen.queryByTitle("secret-feature");
-    expect(secretFeature).not.toBeInTheDocument();
-  });
-
-  it("allows access to the known keys", () => {
-    renderInTestProvider({ magic: "true", keanu: "whoa" });
-
-    const keys = screen.getByTestId("known-keys");
-    expect(keys).toHaveTextContent('["magic","keanu"]');
   });
 });
