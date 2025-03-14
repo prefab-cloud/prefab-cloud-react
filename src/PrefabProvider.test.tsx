@@ -4,51 +4,14 @@ import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { act } from "react-dom/test-utils";
 import { ContextValue, Prefab } from "@prefab-cloud/prefab-cloud-js";
-import {
-  ContextAttributes,
-  PrefabProvider,
-  usePrefab,
-  usePrefabTypesafe,
-  createPrefabHook,
-} from "./PrefabProvider";
+import { ContextAttributes, PrefabProvider, usePrefab, usePrefabTypesafe } from "./PrefabProvider";
 import { PrefabTestProvider } from "./PrefabTestProvider";
-
-// Simple TypesafeClass for testing
-class AppConfig {
-  private prefab: Prefab;
-
-  constructor(prefab: Prefab) {
-    this.prefab = prefab;
-  }
-
-  isFeatureEnabled(): boolean {
-    return this.prefab.isEnabled("feature");
-  }
-
-  getAppName(): string {
-    const name = this.prefab.get("app.name");
-    return typeof name === "string" ? name : "Default App";
-  }
-
-  getApiUrl(): string {
-    const url = this.prefab.get("api.url");
-    return typeof url === "string" ? url : "https://api.default.com";
-  }
-
-  getThemeColor(): string {
-    const color = this.prefab.get("theme.color");
-    return typeof color === "string" ? color : "#000000";
-  }
-
-  calculateTimeout(multiplier: number): number {
-    const baseValue = this.prefab.get("timeout.base");
-    const base = typeof baseValue === "number" ? baseValue : 1000;
-    return base * multiplier;
-  }
-}
-
-// Create a typed hook for our test class
-const useAppConfig = createPrefabHook(AppConfig);
+import {
+  AppConfig,
+  TypesafeComponent,
+  HookComponent,
+  mockEvaluationsResponse,
+} from "./test-helpers";
 
 type Config = { [key: string]: any };
 
@@ -72,43 +35,6 @@ function MyComponent() {
       )}
 
       <pre data-testid="known-keys">{JSON.stringify(keys)}</pre>
-    </div>
-  );
-}
-
-// Component using the TypesafeClass
-function TypesafeComponent() {
-  const { isFeatureEnabled, getAppName, getThemeColor, loading } = usePrefabTypesafe<AppConfig>();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div>
-      <h1 data-testid="app-name">{getAppName()}</h1>
-      <div data-testid="theme-color" style={{ color: getThemeColor() }}>
-        Themed content
-      </div>
-      <div data-testid="raw-theme-color">{getThemeColor()}</div>
-      {isFeatureEnabled() && <div data-testid="feature-flag">Feature Enabled</div>}
-    </div>
-  );
-}
-
-// Component using the custom typed hook
-function HookComponent() {
-  const { getAppName, getApiUrl, calculateTimeout, loading } = useAppConfig();
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div>
-      <h1 data-testid="app-name-hook">{getAppName()}</h1>
-      <div data-testid="api-url">{getApiUrl()}</div>
-      <div data-testid="timeout">{calculateTimeout(2)}</div>
     </div>
   );
 }
@@ -238,7 +164,7 @@ describe("PrefabProvider", () => {
       { contextAttributes: { user: { email: "old@example.com" } } }
     );
 
-    let alert = screen.queryByRole("alert");
+    const alert = screen.queryByRole("alert");
     expect(alert).toHaveTextContent("CUSTOM");
 
     const newConfigPromise = stubConfig({
@@ -259,13 +185,12 @@ describe("PrefabProvider", () => {
     });
 
     await newConfigPromise;
-
-    // wait for re-render
+    // wait for render
     // eslint-disable-next-line no-promise-executor-return
     await new Promise((r) => setTimeout(r, 1));
 
-    alert = screen.queryByRole("alert");
-    expect(alert).toHaveTextContent("ANOTHER");
+    const updatedAlert = screen.queryByRole("alert");
+    expect(updatedAlert).toHaveTextContent("ANOTHER");
   });
 
   it("re-fetches when you update the contextAttributes prop on the provider", async () => {
@@ -375,15 +300,7 @@ describe("PrefabProvider with TypesafeClass", () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
         ok: true,
-        json: () => ({
-          evaluations: {
-            "app.name": { value: { string: "Test App" } },
-            "api.url": { value: { string: "https://api.test.com" } },
-            "theme.color": { value: { string: "#FF5500" } },
-            feature: { value: { boolean: true } },
-            "timeout.base": { value: { int: 2000 } },
-          },
-        }),
+        json: () => mockEvaluationsResponse,
       })
     ) as jest.Mock;
   });
@@ -467,54 +384,6 @@ describe("PrefabProvider with TypesafeClass", () => {
   });
 });
 
-describe("PrefabProvider TypesafeClass with PrefabTestProvider", () => {
-  it("makes TypesafeClass methods available in test environment", async () => {
-    render(
-      <PrefabTestProvider
-        config={{
-          "app.name": "Test App From TestProvider",
-          "api.url": "https://test-provider.example.com",
-          "theme.color": "#00FF00",
-          feature: true,
-          "timeout.base": 3000,
-        }}
-        PrefabTypesafeClass={AppConfig}
-      >
-        <TypesafeComponent />
-        <HookComponent />
-      </PrefabTestProvider>
-    );
-
-    // No need to wait for loading since PrefabTestProvider is synchronous
-    expect(screen.getByTestId("app-name")).toHaveTextContent("Test App From TestProvider");
-    expect(screen.getByTestId("api-url")).toHaveTextContent("https://test-provider.example.com");
-    expect(screen.getByTestId("raw-theme-color")).toHaveTextContent("#00FF00");
-    expect(screen.getByTestId("feature-flag")).toBeInTheDocument();
-    expect(screen.getByTestId("timeout")).toHaveTextContent("6000"); // 3000 * 2
-  });
-
-  it("uses default values when configs are not provided in test provider", async () => {
-    render(
-      <PrefabTestProvider
-        config={{
-          // Only provide some configs
-          "app.name": "Only App Name Set",
-        }}
-        PrefabTypesafeClass={AppConfig}
-      >
-        <TypesafeComponent />
-        <HookComponent />
-      </PrefabTestProvider>
-    );
-
-    expect(screen.getByTestId("app-name")).toHaveTextContent("Only App Name Set");
-    expect(screen.getByTestId("api-url")).toHaveTextContent("https://api.default.com");
-    expect(screen.getByTestId("raw-theme-color")).toHaveTextContent("#000000");
-    expect(screen.queryByTestId("feature-flag")).not.toBeInTheDocument();
-    expect(screen.getByTestId("timeout")).toHaveTextContent("2000"); // 1000 (default) * 2
-  });
-});
-
 describe("TypesafeClass instance memoization", () => {
   it("memoizes the TypesafeClass instance across renders", async () => {
     // Create a mocked version of our TypesafeClass with constructor and method spies
@@ -529,7 +398,7 @@ describe("TypesafeClass instance memoization", () => {
 
       private prefab: Prefab;
 
-      getAppName(): string {
+      appName(): string {
         methodSpy();
         const name = this.prefab.get("app.name");
         return typeof name === "string" ? name : "Default App";
@@ -539,7 +408,7 @@ describe("TypesafeClass instance memoization", () => {
     // Component that forces re-renders and tracks calls
     function ReRenderingComponent() {
       const [counter, setCounter] = React.useState(0);
-      const { getAppName } = usePrefabTypesafe<TrackedAppConfig>();
+      const { appName } = usePrefabTypesafe<TrackedAppConfig>();
 
       // Force a re-render after mounting
       React.useEffect(() => {
@@ -548,12 +417,9 @@ describe("TypesafeClass instance memoization", () => {
         }
       }, [counter]);
 
-      // Call the method on each render
-      const result = getAppName();
-
       return (
         <div data-testid="counter">
-          {result} (Render count: {counter})
+          {appName()} (Render count: {counter})
         </div>
       );
     }
@@ -574,8 +440,8 @@ describe("TypesafeClass instance memoization", () => {
       expect(screen.getByTestId("counter")).toHaveTextContent("(Render count: 3)");
     });
 
-    // Constructor should only be called once, but the method should be called on each render
+    // Constructor should only be called once, but the method should be called for each render
     expect(constructorSpy).toHaveBeenCalledTimes(1);
-    expect(methodSpy).toHaveBeenCalledTimes(4); // Initial render + 3 updates
+    expect(methodSpy).toHaveBeenCalledTimes(4);
   });
 });

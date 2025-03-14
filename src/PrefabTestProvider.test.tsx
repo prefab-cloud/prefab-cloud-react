@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { usePrefab } from "./PrefabProvider";
 import { PrefabTestProvider } from "./PrefabTestProvider";
+import { AppConfig, TypesafeComponent, HookComponent, typesafeTestConfig } from "./test-helpers";
 
 function MyComponent() {
   const { get, isEnabled, loading, keys } = usePrefab();
@@ -78,5 +79,44 @@ describe("PrefabTestProvider", () => {
 
     const keys = screen.getByTestId("known-keys");
     expect(keys).toHaveTextContent('["magic","keanu"]');
+  });
+});
+
+describe("PrefabTestProvider with TypesafeClass", () => {
+  it("makes TypesafeClass methods available in test environment", () => {
+    render(
+      <PrefabTestProvider config={typesafeTestConfig} PrefabTypesafeClass={AppConfig}>
+        <TypesafeComponent />
+        <HookComponent />
+      </PrefabTestProvider>
+    );
+
+    // No need to wait for loading since PrefabTestProvider is synchronous
+    expect(screen.getByTestId("app-name")).toHaveTextContent("Test App From TestProvider");
+    expect(screen.getByTestId("api-url")).toHaveTextContent("https://test-provider.example.com");
+    expect(screen.getByTestId("raw-theme-color")).toHaveTextContent("#00FF00");
+    expect(screen.getByTestId("feature-flag")).toBeInTheDocument();
+    expect(screen.getByTestId("timeout")).toHaveTextContent("6000"); // 3000 * 2
+  });
+
+  it("uses default values when configs are not provided in test provider", () => {
+    render(
+      <PrefabTestProvider
+        config={{
+          // Only provide some configs
+          "app.name": "Only App Name Set",
+        }}
+        PrefabTypesafeClass={AppConfig}
+      >
+        <TypesafeComponent />
+        <HookComponent />
+      </PrefabTestProvider>
+    );
+
+    expect(screen.getByTestId("app-name")).toHaveTextContent("Only App Name Set");
+    expect(screen.getByTestId("api-url")).toHaveTextContent("https://api.default.com");
+    expect(screen.getByTestId("raw-theme-color")).toHaveTextContent("#000000");
+    expect(screen.queryByTestId("feature-flag")).not.toBeInTheDocument();
+    expect(screen.getByTestId("timeout")).toHaveTextContent("2000"); // 1000 (default) * 2
   });
 });
