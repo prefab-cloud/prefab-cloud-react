@@ -73,7 +73,6 @@ export function HookComponent() {
   );
 }
 
-// Test data
 export const typesafeTestConfig = {
   "app.name": "Test App From TestProvider",
   "api.url": "https://test-provider.example.com",
