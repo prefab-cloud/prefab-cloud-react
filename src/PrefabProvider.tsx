@@ -33,7 +33,8 @@ type SharedSettings = {
   collectContextMode?: CollectContextModeType;
 };
 
-export type ProvidedContext<T = Record<string, unknown>> = {
+// Extract base context without ClassMethods
+export type BaseContext = {
   get: (key: string) => any;
   getDuration(key: string): Duration | undefined;
   contextAttributes: ContextAttributes;
@@ -42,20 +43,24 @@ export type ProvidedContext<T = Record<string, unknown>> = {
   prefab: typeof prefab;
   keys: string[];
   settings: SharedSettings;
-} & ClassMethods<T>; // from PrefabTypesafe
+};
 
-export const defaultContext: ProvidedContext = {
+export type ProvidedContext<T = Record<string, unknown>> = BaseContext & ClassMethods<T>;
+
+export const defaultContext: BaseContext = {
   get: (_: string) => undefined,
   getDuration: (_: string) => undefined,
   isEnabled: (_: string) => false,
-  keys: [],
+  keys: [] as string[],
   loading: true,
   contextAttributes: {},
   prefab,
   settings: {},
 };
 
-export const PrefabContext = React.createContext<ProvidedContext>(defaultContext);
+export const PrefabContext = React.createContext<ProvidedContext>(
+  defaultContext as ProvidedContext
+);
 
 // This is a factory function that creates a fully typed usePrefab hook for a specific PrefabTypesafe class
 export const createPrefabHook =
