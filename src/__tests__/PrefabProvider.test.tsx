@@ -4,8 +4,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import { act } from "react-dom/test-utils";
 import { ContextValue, Prefab } from "@prefab-cloud/prefab-cloud-js";
-import { ContextAttributes, PrefabProvider, usePrefab, usePrefabTypesafe } from "./PrefabProvider";
-import { PrefabTestProvider } from "./PrefabTestProvider";
+import {
+  ContextAttributes,
+  PrefabProvider,
+  usePrefab,
+  usePrefabTypesafe,
+  PrefabTestProvider,
+} from "../index";
 import {
   AppConfig,
   TypesafeComponent,

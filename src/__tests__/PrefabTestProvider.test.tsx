@@ -1,8 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
-import { usePrefab } from "./PrefabProvider";
-import { PrefabTestProvider } from "./PrefabTestProvider";
+import { PrefabTestProvider, usePrefab } from "../index";
 import { AppConfig, TypesafeComponent, HookComponent, typesafeTestConfig } from "./test-helpers";
 
 function MyComponent() {

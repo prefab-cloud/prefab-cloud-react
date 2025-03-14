@@ -9,7 +9,7 @@ import {
   usePrefab,
   ContextAttributes,
   SharedSettings,
-} from "./index";
+} from "../index";
 
 enableFetchMocks();
 

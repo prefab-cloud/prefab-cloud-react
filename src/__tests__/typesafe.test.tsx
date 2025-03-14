@@ -5,11 +5,11 @@ import "@testing-library/jest-dom/extend-expect";
 import { Prefab } from "@prefab-cloud/prefab-cloud-js";
 import {
   PrefabProvider,
-  PrefabTestProvider,
   usePrefabTypesafe,
   createPrefabHook,
   PrefabTypesafeClass,
-} from "./index";
+  PrefabTestProvider,
+} from "../index";
 
 // Mock the prefab API responses for testing
 jest.mock("@prefab-cloud/prefab-cloud-js", () => {

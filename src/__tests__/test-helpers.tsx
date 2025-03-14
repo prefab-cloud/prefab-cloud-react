@@ -1,6 +1,6 @@
 import React from "react";
 import { Prefab } from "@prefab-cloud/prefab-cloud-js";
-import { usePrefabTypesafe, createPrefabHook } from "./PrefabProvider";
+import { usePrefabTypesafe, createPrefabHook } from "../index";
 
 // Simple TypesafeClass for testing
 export class AppConfig {

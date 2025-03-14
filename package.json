@@ -13,6 +13,12 @@
       "default": "./dist/index.cjs"
     }
   },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "prebuild": "node scripts/update-version.js",
     "build": "rm -rf dist/ && tsup",
