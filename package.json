@@ -31,7 +31,7 @@
     "format:fix": "prettier --write .",
     "release": "npm run format:fix && npm run lint && npm run test && npm run build",
     "postversion": "git push && git push --tags",
-    "version": "echo 'version' && npm run release && npm run prettier:fix && npm run build && git add src/version.ts",
+    "version": "echo 'version' && npm run release && npm run format:fix && npm run build && git add src/version.ts",
     "prepare": "husky"
   },
   "author": "Jeffrey Chupp",
