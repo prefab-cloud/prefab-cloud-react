@@ -1,5 +1,9 @@
 Changelog
 
+## 0.4.4 - 2025-04-10
+
+- Silently handle Telemetry AbortErrors
+
 ## 0.4.4 - 2025-03-12
 
 - Use tsup for better ESM/CJS compatibility
