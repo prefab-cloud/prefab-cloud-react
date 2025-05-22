@@ -1,6 +1,10 @@
 Changelog
 
-## 0.4.4 - 2025-04-10
+## 0.4.6 - 2025-05-22
+
+- Extra error handling for loader and telemetry uploader
+
+## 0.4.5 - 2025-04-10
 
 - Silently handle Telemetry AbortErrors
 
