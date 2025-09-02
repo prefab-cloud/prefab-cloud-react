@@ -1,5 +1,13 @@
 Changelog
 
+## 0.4.8 - 2025-09-02
+
+- Get latest prefab-cloud-js with no deprecation warnings
+
+## 0.4.7 - 2025-05-22
+
+- Get latest prefab-cloud-js with formal support for extract/hydrate of prefab config
+
 ## 0.4.6 - 2025-05-22
 
 - Extra error handling for loader and telemetry uploader
